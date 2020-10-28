@@ -159,111 +159,9 @@ router.post('/findDomainNameBlackList.la', (req, res) => {
 
 //  接口2 （根据条件查询域名质量表）（提取）
 router.post('/findDomainNameQuality.la', (req, res) => {
-    let obj = {};
-    obj.extractTime = req.body.extractTime;
-    obj.channel = req.body.channel;
-    obj.extractCondition = req.body.extractCondition;
-    obj.count = req.body.count;
-    obj.page = req.body.page;
-    obj.id = req.body.id;
-
     res.json({
         success: true,
-        message: '提取成功',
-        data: {
-            totalCount: 13445,
-            list: [{
-                    id: '1',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '2',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '3',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '4',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '5',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '6',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '7',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '8',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '9',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-                {
-                    id: '10',
-                    cityName: '全省',
-                    channel: "IDC",
-                    domainName: "www.axa.cn",
-                    ymCount: "10",
-                    score: "55.71",
-                    count: "7"
-                },
-            ]
-        }
+        message: '提取失败',
     })
 })
 
@@ -3395,5 +3293,33 @@ router.post('/getDomainNameDomain.la', (req, res) => {
         }
     })
 })
+
+//  接口20 （查询数据  新接口）
+router.post('/findDomainNameFromTemporary.la', (req, res) => {
+    res.json({
+        success: true,
+        message: '提取成功',
+        data: {
+            totalCount: 0,
+            list: []
+        }
+    })
+})
+
+let statusCount = 0;
+//  接口22 （提取状态  新接口）
+router.post('/findBlackInsertByUserId.la', (req, res) => {
+    res.json({
+        success: true,
+        message: '程序报错',
+        data: statusCount % 10 == 0 ? '提取成功' :
+            (statusCount % 11 == 0 ? '提取失败' : '正在提取')
+        // data: '正在提取'
+        // data: '提取成功'
+        // data: '提取失败'
+        // data: '未提取'
+    })
+})
+
 
 module.exports = router;

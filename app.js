@@ -59,11 +59,14 @@ const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy');  // 区�
 const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController');  // 菜单配置
 const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController');  // 角色管理
 const analysisRouter = require('./routes/analysis/analysis');  // 用户质量分析
+const top20DomainRouter = require('./routes/Top20Domain/Top20Domain');  // TOP 20 域名
 
 // 湖南一键应急
 const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai');  // 湖南一键应急 重保工作台
 // 重庆一键应急
 const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu');  // 重庆一键应急 域名封堵
+// CRM
+const CRM_User = require('./routes/CRM/User');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
@@ -73,12 +76,15 @@ app.use('/strategy', schedpolicyRouter);  // 区域配置
 app.use('/interfaceController', interfaceControllerRouter);  // 菜单配置
 app.use('/interfaceRoleController', InterfaceRoleControllerRouter);  // 角色管理
 app.use('/analysis', analysisRouter);  // 角色管理
+app.use('/top20', top20DomainRouter);  // TOP 20 域名
 app.use('/users', usersRouter);
 app.use('/upload', uploadRouter);
 app.use('/company', companyRouter);
 app.use('/home', homeRouter);
 app.use('/product', productRouter);
 app.use('/front', frontRouter);
+// CRM
+app.use('/crm/user', CRM_User);
 
 // 湖南一键应急 路由
 app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai);  // 湖南一键应急 重保工作台
