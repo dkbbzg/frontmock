@@ -67,6 +67,7 @@ const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai');  
 const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu');  // 重庆一键应急 域名封堵
 // CRM
 const CRM_User = require('./routes/CRM/User');
+const CRM_Category = require('./routes/CRM/Category');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
@@ -85,6 +86,7 @@ app.use('/product', productRouter);
 app.use('/front', frontRouter);
 // CRM
 app.use('/crm/user', CRM_User);
+app.use('/crm/category', CRM_Category);
 
 // 湖南一键应急 路由
 app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai);  // 湖南一键应急 重保工作台
