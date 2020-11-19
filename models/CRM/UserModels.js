@@ -4,10 +4,9 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
     "_id": String,
     "user_name": String,
-    "user_pwd": String,
-    "user_jurisdiction": Number
+    "user_pwd": String
 });
 
-const UserModels = mongoose.model('users', UserSchema)
+const UserModels = mongoose.model('user', UserSchema)
 
 module.exports = UserModels

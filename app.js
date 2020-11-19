@@ -7,15 +7,15 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 
 // 连接本地数据库
-// const mongoose = require('mongoose');
-// mongoose.connect('mongodb://127.0.0.1:27017/frontmock');
-// const db = mongoose.connection;
-// db.on('error', function (error) {
-//   console.log('Database frontmock connect error: ' + error)
-// })
-// db.once('open', function () {
-//   console.log('Database frontmock connect success!')
-// })
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1:27017/CRM');
+const db = mongoose.connection;
+db.on('error', function (error) {
+  console.log('Database frontmock connect error: ' + error)
+})
+db.once('open', function () {
+  console.log('Database CRM connect success!')
+})
 
 // 创建项目实例
 var app = express();
