@@ -5,6 +5,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const expressJwt = require('express-jwt');
+const SecretKey = 'CrMsEcReT';
 
 // 连接本地数据库
 const mongoose = require('mongoose');
@@ -38,12 +40,29 @@ app.set('view engine', 'pug');
 // 定义日志和输出级别
 app.use(logger('dev'));
 // 定义数据解析器
-app.use(bodyParser.json({limit:'5mb'})); 
-app.use(bodyParser.urlencoded({extended:true, limit:'5mb'}));
+app.use(bodyParser.json({
+  limit: '5mb'
+}));
+app.use(bodyParser.urlencoded({
+  extended: true,
+  limit: '5mb'
+}));
 // 定义cookie解析器
 app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Token管理
+app.use(expressJwt({
+  secret: SecretKey, // 签名的密钥 或 PublicKey
+  algorithms: ['HS256'], // 加密算法
+  credentialsRequired: true, //  允许无 Token 请求  false:不需要
+  isRevoked: (req, payload, done) => {
+    console.log(req, payload, done)
+  }
+}).unless({
+  path: ['/crm/user/login'] // 指定路径不经过 Token 解析
+}))
 
 // 加载路由控制
 const indexRouter = require('./routes/index');
@@ -53,31 +72,31 @@ const companyRouter = require('./routes/company');
 const homeRouter = require('./routes/home');
 const productRouter = require('./routes/product');
 const frontRouter = require('./routes/front');
-const monitorviewRouter = require('./routes/monitor/monitorview');  // 监控试图概览接口
-const domainNameBlacklistRouter = require('./routes/domainNameBlacklist/domainNameBlacklist');  // 域名黑名单接口
-const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy');  // 区域配置
-const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController');  // 菜单配置
-const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController');  // 角色管理
-const analysisRouter = require('./routes/analysis/analysis');  // 用户质量分析
-const top20DomainRouter = require('./routes/Top20Domain/Top20Domain');  // TOP 20 域名
+const monitorviewRouter = require('./routes/monitor/monitorview'); // 监控试图概览接口
+const domainNameBlacklistRouter = require('./routes/domainNameBlacklist/domainNameBlacklist'); // 域名黑名单接口
+const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy'); // 区域配置
+const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController'); // 菜单配置
+const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController'); // 角色管理
+const analysisRouter = require('./routes/analysis/analysis'); // 用户质量分析
+const top20DomainRouter = require('./routes/Top20Domain/Top20Domain'); // TOP 20 域名
 
 // 湖南一键应急
-const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai');  // 湖南一键应急 重保工作台
+const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai'); // 湖南一键应急 重保工作台
 // 重庆一键应急
-const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu');  // 重庆一键应急 域名封堵
+const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu'); // 重庆一键应急 域名封堵
 // CRM
 const CRM_User = require('./routes/CRM/User');
 const CRM_Category = require('./routes/CRM/Category');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
-app.use('/monitorview', monitorviewRouter);  // 监控试图概览接口
-app.use('/blackList', domainNameBlacklistRouter);  // 域名黑名单接口
-app.use('/strategy', schedpolicyRouter);  // 区域配置
-app.use('/interfaceController', interfaceControllerRouter);  // 菜单配置
-app.use('/interfaceRoleController', InterfaceRoleControllerRouter);  // 角色管理
-app.use('/analysis', analysisRouter);  // 角色管理
-app.use('/top20', top20DomainRouter);  // TOP 20 域名
+app.use('/monitorview', monitorviewRouter); // 监控试图概览接口
+app.use('/blackList', domainNameBlacklistRouter); // 域名黑名单接口
+app.use('/strategy', schedpolicyRouter); // 区域配置
+app.use('/interfaceController', interfaceControllerRouter); // 菜单配置
+app.use('/interfaceRoleController', InterfaceRoleControllerRouter); // 角色管理
+app.use('/analysis', analysisRouter); // 角色管理
+app.use('/top20', top20DomainRouter); // TOP 20 域名
 app.use('/users', usersRouter);
 app.use('/upload', uploadRouter);
 app.use('/company', companyRouter);
@@ -89,9 +108,19 @@ app.use('/crm/user', CRM_User);
 app.use('/crm/category', CRM_Category);
 
 // 湖南一键应急 路由
-app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai);  // 湖南一键应急 重保工作台
+app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai); // 湖南一键应急 重保工作台
 // 重庆一键应急 路由
-app.use('/YuMingFengDu', CQ_YuMingFengDu);  // 重庆一键应急 域名封堵
+app.use('/YuMingFengDu', CQ_YuMingFengDu); // 重庆一键应急 域名封堵
+
+//  解析TOKEN失败
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {
+    res.json({
+      message: '用户登录失效，请重新登录！',
+      code: 400
+    })
+  }
+})
 
 // 404错误处理
 app.use(function (req, res, next) {
