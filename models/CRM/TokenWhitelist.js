@@ -5,6 +5,6 @@ const tokenWhitelistSchema = new Schema({
     "token": String
 }, {versionKey: false});
 
-const TWLModels = mongoose.model('tokenWhitelist', tokenWhitelistSchema)
+const TWLModels = mongoose.model('tokenwhitelist', tokenWhitelistSchema)
 
 module.exports = TWLModels

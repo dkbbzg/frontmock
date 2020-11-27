@@ -4,7 +4,6 @@ const fs = require("fs");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserModels = require('../../models/CRM/UserModels');
-const TWLModels = require('../../models/CRM/TokenWhitelist');
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -26,28 +25,22 @@ router.post('/login', function (req, res) {
                 message: '密码错误，请输入正确的密码！'
             })
         } else {
-            const token = 'Bearer ' + jwt.sign({
-                    _id: data._id,
-                    role: data.user_role
-                },
-                'CrMsEcReT', {
-                    expiresIn: 60
-                }
-            )
-            res.header({
-                authorization: token
+            const new_token = UserSchema.generateAuthToken();
+            console.log(new_token);
+            UserModels.findById(data._id, (err, doc) => {
+                doc.token = new_token;
+                doc.save((err, doc) => {
+                    console.log(doc);
+                    res.header({
+                        authorization: doc.token
+                    })
+                    res.json({
+                        status: true,
+                        message: '登录成功！'
+                    })
+                });
             })
-            let newToken = new TWLModels({
-                token: token
-            })
-            newToken.save();
-            UserModels.findByIdAndUpdate(data._id, {$set:{ token: token }}).then(doc => {
-                TWLModels.findOneAndRemove({token: doc.token});
-            });
-            res.json({
-                status: true,
-                message: '登录成功！'
-            })
+            
         }
     }).catch(err => {
         res.json({

@@ -10,6 +10,7 @@ const SecretKey = 'CrMsEcReT';
 
 // 连接本地数据库
 const mongoose = require('mongoose');
+mongoose.set('useFindAndModify', false);
 mongoose.connect('mongodb://127.0.0.1:27017/CRM');
 const db = mongoose.connection;
 db.on('error', function (error) {
