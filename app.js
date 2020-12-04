@@ -53,14 +53,35 @@ app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
+const UserModels = require('./models/CRM/UserModels');
+let isRevokedCallback = function (req, payload, done) {
+  let _id = payload._id;
+
+  UserModels.findOne({
+    _id: _id
+  }, 'token').then(data => {
+    if (!data || !data.token || data.token != req.headers.authorization) {
+      return done(null, true);
+    } else {
+      return done(null, false);
+    }
+  });
+}
+
 // Token管理
 app.use(expressJwt({
   secret: SecretKey, // 签名的密钥 或 PublicKey
   algorithms: ['HS256'], // 加密算法
   credentialsRequired: true, //  允许无 Token 请求  false:不需要
-  isRevoked: (req, payload, done) => {
-    console.log(req, payload, done)
-  }
+  getToken: function fromHeaderOrQuerystring(req) {
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      return req.headers.authorization.split(' ')[1]
+    } else if (req.headers.authorization) {
+      return req.headers.authorization
+    }
+    return null
+  },
+  isRevoked: isRevokedCallback
 }).unless({
   path: ['/crm/user/login'] // 指定路径不经过 Token 解析
 }))

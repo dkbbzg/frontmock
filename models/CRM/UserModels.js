@@ -10,18 +10,6 @@ const UserSchema = new Schema({
     versionKey: false
 });
 
-UserSchema.methods.generateAuthToken = function () {
-    const token = 'Bearer ' + jwt.sign({
-            _id: data._id,
-            role: data.user_role
-        },
-        'CrMsEcReT', {
-            expiresIn: 60
-        }
-    )
-    return token;
-}
-
 const UserModels = mongoose.model('user', UserSchema)
 
 module.exports = UserModels

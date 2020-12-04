@@ -25,12 +25,17 @@ router.post('/login', function (req, res) {
                 message: '密码错误，请输入正确的密码！'
             })
         } else {
-            const new_token = UserSchema.generateAuthToken();
-            console.log(new_token);
+            const new_token = 'Bearer ' + jwt.sign({
+                    _id: data._id,
+                    role: data.user_role
+                },
+                'CrMsEcReT', {
+                    expiresIn: 3600 * 24 * 3
+                }
+            )
             UserModels.findById(data._id, (err, doc) => {
                 doc.token = new_token;
                 doc.save((err, doc) => {
-                    console.log(doc);
                     res.header({
                         authorization: doc.token
                     })
@@ -40,7 +45,7 @@ router.post('/login', function (req, res) {
                     })
                 });
             })
-            
+
         }
     }).catch(err => {
         res.json({
@@ -115,15 +120,13 @@ router.post('/updatePWD', function (req, res) {
                 status: false,
                 message: '用户登录失效，请重新登录！'
             })
-        }
-        else if (!bcrypt.compareSync(old_user_pwd, data.user_pwd)) {
+        } else if (!bcrypt.compareSync(old_user_pwd, data.user_pwd)) {
             res.json({
                 code: 200,
                 status: false,
                 message: '旧密码错误，请输入正确的密码！'
             })
-        }
-        else {
+        } else {
             UserModels.updateOne({
                 _id: req.user._id
             }, {
@@ -134,7 +137,7 @@ router.post('/updatePWD', function (req, res) {
                         code: 401,
                         status: false,
                         message: err
-                    }) 
+                    })
                 }
                 res.json({
                     code: 200,
@@ -142,16 +145,42 @@ router.post('/updatePWD', function (req, res) {
                     message: '修改密码成功！'
                 })
             })
-            
+
         }
     })
 })
 // 退出登录
 router.post('/logout', function (req, res) {
-    res.json({
-        code: 200,
-        status: false,
-        message: req.user
+    UserModels.findOne({
+        _id: req.user._id
+    }, 'token').then(data => {
+        if (!data) {
+            res.json({
+                code: 400,
+                status: false,
+                message: '用户登录失效，请重新登录！'
+            })
+        } else {
+            UserModels.updateOne({
+                _id: req.user._id
+            }, {
+                token: ''
+            }, err => {
+                if (err) {
+                    res.json({
+                        code: 401,
+                        status: false,
+                        message: err
+                    })
+                }
+                res.json({
+                    code: 200,
+                    status: true,
+                    message: '退出登录!'
+                })
+            })
+
+        }
     })
 })
 
