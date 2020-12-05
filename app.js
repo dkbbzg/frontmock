@@ -29,7 +29,7 @@ app.all('*', function (req, res, next) {
   //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
   res.header('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With, tokenUuid, usertoken, token');
   res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Expose-Headers', 'tokenUuid')
+  res.header('Access-Control-Expose-Headers', 'Authorization')
   res.header('Content-Type', 'application/json; charset=utf-8');
   next();
 });

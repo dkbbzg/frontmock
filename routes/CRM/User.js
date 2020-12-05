@@ -16,12 +16,12 @@ router.post('/login', function (req, res) {
     }).then(data => {
         if (!data) {
             res.json({
-                status: false,
+                success: false,
                 message: '此账号不存在！'
             })
         } else if (!bcrypt.compareSync(user_pwd, data.user_pwd)) {
             res.json({
-                status: false,
+                success: false,
                 message: '密码错误，请输入正确的密码！'
             })
         } else {
@@ -37,10 +37,10 @@ router.post('/login', function (req, res) {
                 doc.token = new_token;
                 doc.save((err, doc) => {
                     res.header({
-                        authorization: doc.token
+                        Authorization: doc.token
                     })
                     res.json({
-                        status: true,
+                        success: true,
                         message: '登录成功！'
                     })
                 });
@@ -49,7 +49,7 @@ router.post('/login', function (req, res) {
         }
     }).catch(err => {
         res.json({
-            status: false,
+            success: false,
             message: err
         })
     })
@@ -73,19 +73,19 @@ router.post('/register', function (req, res) {
                 newUserData.save((err, data) => {
                     if (err) {
                         res.json({
-                            status: false,
+                            success: false,
                             message: err
                         })
                     } else {
                         res.json({
-                            status: true,
+                            success: true,
                             message: '注册成功'
                         })
                     }
                 })
             } else {
                 res.json({
-                    status: false,
+                    success: false,
                     message: '此账号已存在'
                 })
             }
@@ -93,7 +93,7 @@ router.post('/register', function (req, res) {
     } else {
         res.json({
             code: 401,
-            status: false,
+            success: false,
             message: '当前用户无权限！'
         })
     }
@@ -106,7 +106,7 @@ router.post('/updatePWD', function (req, res) {
     if (old_user_pwd == new_user_pwd) {
         res.json({
             code: 200,
-            status: false,
+            success: false,
             message: '原密码和新密码不能相同！'
         })
     }
@@ -117,13 +117,13 @@ router.post('/updatePWD', function (req, res) {
         if (!data) {
             res.json({
                 code: 400,
-                status: false,
+                success: false,
                 message: '用户登录失效，请重新登录！'
             })
         } else if (!bcrypt.compareSync(old_user_pwd, data.user_pwd)) {
             res.json({
                 code: 200,
-                status: false,
+                success: false,
                 message: '旧密码错误，请输入正确的密码！'
             })
         } else {
@@ -135,13 +135,13 @@ router.post('/updatePWD', function (req, res) {
                 if (err) {
                     res.json({
                         code: 401,
-                        status: false,
+                        success: false,
                         message: err
                     })
                 }
                 res.json({
                     code: 200,
-                    status: true,
+                    success: true,
                     message: '修改密码成功！'
                 })
             })
@@ -157,7 +157,7 @@ router.post('/logout', function (req, res) {
         if (!data) {
             res.json({
                 code: 400,
-                status: false,
+                success: false,
                 message: '用户登录失效，请重新登录！'
             })
         } else {
@@ -169,17 +169,41 @@ router.post('/logout', function (req, res) {
                 if (err) {
                     res.json({
                         code: 401,
-                        status: false,
+                        success: false,
                         message: err
                     })
                 }
                 res.json({
                     code: 200,
-                    status: true,
+                    success: true,
                     message: '退出登录!'
                 })
             })
 
+        }
+    })
+})
+// 判断用户是否登录
+router.post('/getUserInfo', function (req, res) {
+    UserModels.findOne({
+        _id: req.user._id
+    }).then(data => {
+        if (!data) {
+            res.json({
+                code: 400,
+                success: false,
+                message: '用户登录失效，请重新登录！'
+            })
+        } else {
+            let user_data = {
+                user_name: data.user_name,
+                user_role: data.user_role
+            }
+            res.json({
+                code: 200,
+                success: true,
+                user: user_data
+            })
         }
     })
 })
