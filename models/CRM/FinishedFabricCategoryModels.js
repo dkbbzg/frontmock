@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const FabricCategorySchema = new Schema({
+const FinishedFabricCategorySchema = new Schema({
     "id": String,       //  编号
     "name": String,     //  名称
     "remark": String,   //  备注
@@ -12,6 +12,6 @@ const FabricCategorySchema = new Schema({
     versionKey: false
 });
 
-const FabricCategoryModels = mongoose.model('fabric_category', FabricCategorySchema, 'fabric_categorys')
+const FinishedFabricCategoryModels = mongoose.model('finished_fabric_category', FinishedFabricCategorySchema, 'finished_fabric_categorys')
 
-module.exports = FabricCategoryModels
+module.exports = FinishedFabricCategoryModels
