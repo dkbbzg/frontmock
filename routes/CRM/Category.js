@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const fs = require("fs");
 //  原料品类
-const RawMaterialCategoryModels = require('../../models/CRM/RawMaterialCategoryModels');
+const RawMaterialCategoryModels = require('../../models/CRM/Category/RawMaterialCategoryModels');
 //  胚布品类
-const FabricCategoryModels = require('../../models/CRM/FabricCategoryModels');
+const FabricCategoryModels = require('../../models/CRM/Category/FabricCategoryModels');
 //  成品布品类
-const FinishedFabricCategoryModels = require('../../models/CRM/FinishedFabricCategoryModels');
+const FinishedFabricCategoryModels = require('../../models/CRM/Category/FinishedFabricCategoryModels');
 //  颜色品类
-const ColorCategoryModels = require('../../models/CRM/ColorCategoryModels');
+const ColorCategoryModels = require('../../models/CRM/Category/ColorCategoryModels');
 
 
 //  原料品类
@@ -193,6 +193,61 @@ router.post('/addEditRMC', (req, res) => {
             }
         })
     }
+})
+//  选择框，模糊搜索相关的数据
+router.post('/getRMCs', (req, res) => {
+    let search = req.body.search;
+
+    let queryParams = {
+        $or: [{
+                id: {
+                    $regex: search
+                }
+            },
+            {
+                name: {
+                    $regex: search
+                }
+            },
+            {
+                remark: {
+                    $regex: search
+                }
+            }
+        ]
+    }
+
+    RawMaterialCategoryModels.count(queryParams).exec((err, count) => {
+        if (err) {
+            res.json({
+                success: false,
+                message: err,
+                data: []
+            })
+        } else {
+            RawMaterialCategoryModels
+                .find(queryParams)
+                .limit(100)
+                .sort({
+                    _id: -1
+                })
+                .exec((err, doc) => {
+                    if (err) {
+                        res.json({
+                            success: false,
+                            message: err,
+                            data: []
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            message: '查询成功',
+                            data: doc
+                        })
+                    }
+                })
+        }
+    })
 })
 
 //  胚布品类

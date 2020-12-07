@@ -109,6 +109,7 @@ const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu'); // 重庆一键应�
 // CRM
 const CRM_User = require('./routes/CRM/User');
 const CRM_Category = require('./routes/CRM/Category');
+const CRM_People = require('./routes/CRM/People');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
@@ -128,6 +129,7 @@ app.use('/front', frontRouter);
 // CRM
 app.use('/crm/user', CRM_User);
 app.use('/crm/category', CRM_Category);
+app.use('/crm/people', CRM_People);
 
 // 湖南一键应急 路由
 app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai); // 湖南一键应急 重保工作台
