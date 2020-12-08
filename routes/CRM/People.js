@@ -106,7 +106,9 @@ router.post('/addEditRMS', (req, res) => {
     let phone = req.body.phone;
     let name = req.body.name;
     let remark = req.body.remark;
+    let products = req.body.products ? JSON.parse(req.body.products) : '';
     let type = req.body.type;
+    console.log(products)
 
     if (type == 'add') {
         // 新增
@@ -123,26 +125,51 @@ router.post('/addEditRMS', (req, res) => {
 
             RawMaterialSupplierModels.findOne(queryParams).then(data => {
                 if (!data) {
-                    let newRMC = new RawMaterialSupplierModels({
-                        id: id,
-                        name: name,
-                        address: address,
-                        phone: phone,
-                        remark: remark
-                    })
-                    newRMC.save((err, data) => {
-                        if (err) {
-                            res.json({
-                                success: false,
-                                message: err
-                            })
-                        } else {
-                            res.json({
-                                success: true,
-                                message: '新增原料商单位成功!'
-                            })
-                        }
-                    })
+                    if (products) {
+                        let newRMC = new RawMaterialSupplierModels({
+                            id: id,
+                            name: name,
+                            address: address,
+                            phone: phone,
+                            remark: remark,
+                            products: products
+                        })
+                        newRMC.save((err, data) => {
+                            if (err) {
+                                res.json({
+                                    success: false,
+                                    message: err
+                                })
+                            } else {
+                                res.json({
+                                    success: true,
+                                    message: '新增原料商单位成功!'
+                                })
+                            }
+                        })
+                    }
+                    else {
+                        let newRMC = new RawMaterialSupplierModels({
+                            id: id,
+                            name: name,
+                            address: address,
+                            phone: phone,
+                            remark: remark,
+                        })
+                        newRMC.save((err, data) => {
+                            if (err) {
+                                res.json({
+                                    success: false,
+                                    message: err
+                                })
+                            } else {
+                                res.json({
+                                    success: true,
+                                    message: '新增原料商单位成功!'
+                                })
+                            }
+                        })
+                    }
                 } else if (data.id == id) {
                     res.json({
                         success: false,

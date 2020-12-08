@@ -8,11 +8,10 @@ const RawMaterialSupplierSchema = new Schema({
     "address": String,  //  单位地址
     "phone": String,    //  联系方式
     "remark": String,   //  备注
-    "product": [
+    "products": [
         {
-            "product_id": String,
-            "product_name": String,
-            "product_count": Number
+            "_id": String,
+            "name": String,
         }
     ]
 }, {
