@@ -56,6 +56,7 @@ router.post('/getRawMaterialSupplier', (req, res) => {
                 .sort({
                     _id: -1
                 })
+                .populate('products.product')
                 .exec((err, doc) => {
                     if (err) {
                         res.json({
@@ -498,6 +499,7 @@ router.post('/getWarehouseManagement', (req, res) => {
                 .sort({
                     _id: -1
                 })
+                .populate('products.product')
                 .exec((err, doc) => {
                     if (err) {
                         res.json({
