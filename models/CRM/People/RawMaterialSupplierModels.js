@@ -10,8 +10,10 @@ const RawMaterialSupplierSchema = new Schema({
     "remark": String,   //  备注
     "products": [
         {
-            "_id": String,
+            "_id": Schema.Types.ObjectId,
+            "id": String,
             "name": String,
+            "remark": String,
         }
     ]
 }, {
