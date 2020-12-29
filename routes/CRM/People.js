@@ -56,7 +56,18 @@ router.post('/getRawMaterialSupplier', (req, res) => {
                 .sort({
                     _id: -1
                 })
-                .populate('products.product')
+                .populate([{
+                    path: 'products.product',
+                    select: {
+                        _id: 0,
+                        id: 1,
+                        name: 1,
+                        remark: 1
+                    },
+                    options: {
+                        limit: 1
+                    }
+                }])
                 .exec((err, doc) => {
                     if (err) {
                         res.json({
