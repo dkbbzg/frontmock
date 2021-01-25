@@ -12,11 +12,12 @@ const WarehouseManagementModels = require('../../models/CRM/People/WarehouseMana
 //  原料商
 //  获取原料商表格数据
 router.post('/getRawMaterialSupplier', (req, res) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let address = req.body.address;
-    let phone = req.body.phone;
-    let remark = req.body.remark;
+    let blank = '';
+    let id = req.body.id ? req.body.id : '';
+    let name = req.body.name ? req.body.name : '';
+    let address = req.body.address ? req.body.address : '';
+    let phone = req.body.phone ? req.body.phone : '';
+    let remark = req.body.remark ? req.body.remark : '';
     let page = parseInt(req.body.page) - 1;
     let pageSize = parseInt(req.body.pageSize);
 
@@ -64,9 +65,6 @@ router.post('/getRawMaterialSupplier', (req, res) => {
                         name: 1,
                         remark: 1
                     },
-                    options: {
-                        limit: 1
-                    }
                 }])
                 .exec((err, doc) => {
                     if (err) {

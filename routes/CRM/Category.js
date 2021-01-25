@@ -14,9 +14,9 @@ const ColorCategoryModels = require('../../models/CRM/Category/ColorCategoryMode
 //  原料品类
 //  获取原料品类表格数据
 router.post('/getRawMaterialCategory', (req, res) => {
-        let id = req.body.id;
-        let name = req.body.name;
-        let remark = req.body.remark;
+        let id = req.body.id ? req.body.id : '';
+        let name = req.body.name ? req.body.name : '';
+        let remark = req.body.remark ? req.body.remark : '';
         let page = parseInt(req.body.page) - 1;
         let pageSize = parseInt(req.body.pageSize);
 

@@ -8,17 +8,13 @@ const RawMaterialSupplierSchema = new Schema({
     "address": String, //  单位地址
     "phone": String, //  联系方式
     "remark": String, //  备注
-    "products": {
-        type: Schema.Types.ObjectId,
-        ref: 'rawMaterial_category'
-    }
-    // "products": [{
-    //     "product": {
-    //         type: Schema.Types.ObjectId,
-    //         ref: 'rawMaterial_category'
-    //     },
-    //     _id: false
-    // }]
+    "products": [{
+        "product": {
+            type: Schema.Types.ObjectId,
+            ref: 'rawMaterial_category'
+        },
+        _id: false
+    }]
 }, {
     versionKey: false
 });
