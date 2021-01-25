@@ -1,8 +1,8 @@
-// 原料商
+// 织造厂
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const RawMaterialSupplierSchema = new Schema({
+const WeavingMillSchema = new Schema({
     "id": String, //  单位编号
     "name": String, //  单位名称
     "address": String, //  单位地址
@@ -11,7 +11,7 @@ const RawMaterialSupplierSchema = new Schema({
     "products": [{
         "product": {
             type: Schema.Types.ObjectId,
-            ref: 'rawMaterial_category'
+            ref: 'fabric_category'
         },
         _id: false
     }]
@@ -19,6 +19,6 @@ const RawMaterialSupplierSchema = new Schema({
     versionKey: false
 });
 
-const RawMaterialSupplierModels = mongoose.model('rawMaterial_supplier', RawMaterialSupplierSchema, 'rawMaterial_suppliers');
+const WeavingMillModels = mongoose.model('weaving_mill', WeavingMillSchema, 'weaving_mills');
 
-module.exports = RawMaterialSupplierModels
+module.exports = WeavingMillModels

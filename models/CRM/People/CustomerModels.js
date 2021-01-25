@@ -1,4 +1,4 @@
-// 胚布品类
+// 客户
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 

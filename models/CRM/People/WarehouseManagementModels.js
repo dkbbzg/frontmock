@@ -1,4 +1,4 @@
-// 胚布品类
+// 仓库管理
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
