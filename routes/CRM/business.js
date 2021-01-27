@@ -3,60 +3,213 @@ const router = express.Router();
 const fs = require("fs");
 //  原料业务
 const RawMaterialBusinessModels = require('../../models/CRM/Business/RawMaterialBusinessModels');
+//  原料商
+const RawMaterialSupplierModels = require('../../models/CRM/People/RawMaterialSupplierModels');
+//  织造厂
+const WeavingMillModels = require('../../models/CRM/People/WeavingMillModels');
+//  客户
+const CustomerModels = require('../../models/CRM/People/CustomerModels');
+//  仓库管理
+const WarehouseManagementModels = require('../../models/CRM/People/WarehouseManagementModels');
+
 
 //  原料业务
 //  获取原料业务表格数据
 router.post('/getRawMaterialBusiness', (req, res) => {
-    // let pass = true;
-    // let _id = req.body._id ? req.body._id : '';
-    // let date = req.body.date ?.pass = !pass;
-    // let from = req.body.from ?.pass = !pass;
-    // let productName = req.body.productName ?.pass = !pass;
-    // let count = req.body.count ?.pass = !pass;
-    // let unitPrice = req.body.unitPrice ?.pass = !pass;
-    // let amount = req.body.amount ?.pass = !pass;
-    // let to = req.body.to ?.pass = !pass;
-    // let usedTo = req.body.usedTo ?.pass = !pass;
-    // let payStatus = req.body.payStatus ?.pass = !pass;
-    // let rawMaterialCount = req.body.rawMaterialCount ? JSON.parse(req.body.rawMaterialCount) : '';
-    // let warehouse = req.body.warehouse ?.pass = !pass;
-    // let KP = req.body.KP ?.pass = !pass;
-    // let type = req.body.type ?.pass = !pass;
-
-    // if (!pass) {
-    //     res.json({
-    //         success: false,
-    //         message: '请填写完整的参数！'
-    //     })
-    // }
-
-    let id = req.body.id ? req.body.id : '';
-    let name = req.body.name ? req.body.name : '';
-    let address = req.body.address ? req.body.address : '';
-    let phone = req.body.phone ? req.body.phone : '';
-    let remark = req.body.remark ? req.body.remark : '';
+    let _id = req.body._id ? req.body._id : '';
+    let startTime = req.body.startTime ? req.body.startTime : '';
+    let endTime = req.body.endTime ? req.body.endTime : '';
+    let from = req.body.from ? req.body.from : '';
+    let productName = req.body.productName ? req.body.productName : '';
+    let to = req.body.to ? req.body.to : '';
+    let usedTo = req.body.usedTo ? req.body.usedTo : '';
+    let payStatus = req.body.payStatus ? parseInt(req.body.payStatus) : '';
+    let warehouse = req.body.warehouse ? req.body.warehouse : '';
+    let KP = req.body.KP ? parseInt(req.body.KP) : '';
     let page = parseInt(req.body.page) - 1;
     let pageSize = parseInt(req.body.pageSize);
 
-    let queryParams = {
-        id: {
-            $regex: id
-        },
-        name: {
-            $regex: name
-        },
-        address: {
-            $regex: address
-        },
-        phone: {
-            $regex: phone
-        },
-        remark: {
-            $regex: remark
+    let queryParams = {};
+
+    if (_id != '') {
+        queryParams._id = {
+            $regex: _id
         }
     }
 
+    if (startTime != '' && endTime != '') {
+        queryParams.date = {
+            "$gte": new Date(startTime),
+            "$lte": new Date(endTime)
+        }
+    } else if (startTime != '' && endTime == '') {
+        queryParams.date = {
+            "$gte": new Date(startTime)
+        }
+    } else if (startTime == '' && endTime != '') {
+        queryParams.date = {
+            "$lte": new Date(endTime)
+        }
+    }
+
+    if (from != '') {
+        RawMaterialSupplierModels.find({
+            $or:[
+                {
+                    id: {
+                        $regex: from
+                    }
+                },
+                {
+                    name: {
+                        $regex: from
+                    }
+                },
+                {
+                    remark: {
+                        $regex: from
+                    }
+                },
+            ]
+        }).then(function (err, doc) {
+            if (doc && doc.length) {
+                let $or = [];
+                doc.map(item => {
+                    $or.push({
+                        _id: item._id
+                    })
+                })
+                queryParams.from = {
+                    $or: $or
+                }
+            }
+        })
+    }
+
+    if (productName != '') {
+        RawMaterialSupplierModels.find({
+            $or:[
+                {
+                    id: {
+                        $regex: productName
+                    }
+                },
+                {
+                    name: {
+                        $regex: productName
+                    }
+                },
+                {
+                    remark: {
+                        $regex: productName
+                    }
+                },
+            ]
+        }).then(function (err, doc) {
+            if (doc && doc.length) {
+                let $or = [];
+                doc.map(item => {
+                    $or.push({
+                        _id: item._id
+                    })
+                })
+                queryParams.productName = {
+                    $or: $or
+                }
+            }
+        })
+    }
+    
+    if (to != '') {
+        RawMaterialSupplierModels.find({
+            $or:[
+                {
+                    id: {
+                        $regex: to
+                    }
+                },
+                {
+                    name: {
+                        $regex: to
+                    }
+                },
+                {
+                    remark: {
+                        $regex: to
+                    }
+                },
+            ]
+        }).then(function (err, doc) {
+            if (doc && doc.length) {
+                let $or = [];
+                doc.map(item => {
+                    $or.push({
+                        _id: item._id
+                    })
+                })
+                queryParams.to = {
+                    $or: $or
+                }
+            }
+        })
+    }
+
+    if (usedTo != '') {
+        queryParams.usedTo = {
+            $regex: usedTo
+        }
+    }
+
+    if (payStatus != '') {
+        queryParams.payStatus = {
+            $regex: payStatus
+        }
+    }
+
+    if (warehouse != '') {
+        RawMaterialSupplierModels.find({
+            $or:[
+                {
+                    id: {
+                        $regex: warehouse
+                    }
+                },
+                {
+                    name: {
+                        $regex: warehouse
+                    }
+                },
+                {
+                    remark: {
+                        $regex: warehouse
+                    }
+                },
+            ]
+        }).then(function (err, doc) {
+            if (doc && doc.length) {
+                let $or = [];
+                doc.map(item => {
+                    $or.push({
+                        _id: item._id
+                    })
+                })
+                queryParams.warehouse = {
+                    $or: $or
+                }
+            }
+        })
+    }
+
+    if (KP != '') {
+        queryParams.KP = {
+            $regex: KP
+        }
+    }
+
+    console.log('queryParams : ', queryParams);
+
     RawMaterialBusinessModels.count(queryParams).exec((err, count) => {
+        console.log(err, count)
         if (err) {
             res.json({
                 success: false,
@@ -75,9 +228,45 @@ router.post('/getRawMaterialBusiness', (req, res) => {
                     _id: -1
                 })
                 .populate([{
-                    path: 'products.product',
+                    path: 'from',
                     select: {
-                        _id: 0,
+                        _id: 1,
+                        id: 1,
+                        name: 1,
+                        remark: 1
+                    },
+                }])
+                .populate([{
+                    path: 'productName',
+                    select: {
+                        _id: 1,
+                        id: 1,
+                        name: 1,
+                        remark: 1
+                    },
+                }])
+                .populate([{
+                    path: 'to',
+                    select: {
+                        _id: 1,
+                        id: 1,
+                        name: 1,
+                        remark: 1
+                    },
+                }])
+                .populate([{
+                    path: 'rawMaterialCount.product',
+                    select: {
+                        _id: 1,
+                        id: 1,
+                        name: 1,
+                        remark: 1
+                    },
+                }])
+                .populate([{
+                    path: 'warehouse',
+                    select: {
+                        _id: 1,
                         id: 1,
                         name: 1,
                         remark: 1
@@ -134,19 +323,19 @@ router.post('/deleteRMB', (req, res) => {
 router.post('/addEditRMB', (req, res) => {
     let pass = true;
     let _id = req.body._id ? req.body._id : '';
-    let date = req.body.date ?.pass = !pass;
-    let from = req.body.from ?.pass = !pass;
-    let productName = req.body.productName ?.pass = !pass;
-    let count = req.body.count ?.pass = !pass;
-    let unitPrice = req.body.unitPrice ?.pass = !pass;
-    let amount = req.body.amount ?.pass = !pass;
-    let to = req.body.to ?.pass = !pass;
-    let usedTo = req.body.usedTo ?.pass = !pass;
-    let payStatus = req.body.payStatus ?.pass = !pass;
+    let date = req.body.date ? req.body.date : pass = false;
+    let from = req.body.from ? req.body.from : pass = false;
+    let productName = req.body.productName ? req.body.productName : pass = false;
+    let count = req.body.count ? req.body.count : pass = false;
+    let unitPrice = req.body.unitPrice ? req.body.unitPrice : pass = false;
+    let amount = count * unitPrice;
+    let to = req.body.to ? req.body.to : pass = false;
+    let usedTo = req.body.usedTo ? req.body.usedTo : '';
+    let payStatus = req.body.payStatus ? req.body.payStatus : pass = false;      //  0未付款、1部分付款、2已付款
     let rawMaterialCount = req.body.rawMaterialCount ? JSON.parse(req.body.rawMaterialCount) : '';
-    let warehouse = req.body.warehouse ?.pass = !pass;
-    let KP = req.body.KP ?.pass = !pass;
-    let type = req.body.type ?.pass = !pass;
+    let warehouse = req.body.warehouse ? req.body.warehouse : pass = false;
+    let KP = req.body.KP ? req.body.KP : pass = false;        //  0不需要，1需要未开，2需要已开
+    let type = req.body.type ? req.body.type : pass = false;
 
     if (!pass) {
         res.json({
@@ -159,7 +348,7 @@ router.post('/addEditRMB', (req, res) => {
         // 新增
         if (req.user.role === 'admin') {
             let newRMC = new RawMaterialBusinessModels({
-                date: date,
+                date: new Date(date),
                 from: from,
                 productName: productName,
                 count: count,
@@ -202,7 +391,7 @@ router.post('/addEditRMB', (req, res) => {
                 })
             } else {
                 let updateParams = {
-                    date: date,
+                    date: new Date(date),
                     from: from,
                     productName: productName,
                     count: count,
