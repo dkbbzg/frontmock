@@ -17,8 +17,8 @@ const WarehouseManagementModels = require('../../models/CRM/People/WarehouseMana
 //  获取原料业务表格数据
 router.post('/getRawMaterialBusiness', (req, res) => {
     let _id = req.body._id ? req.body._id : '';
-    let startTime = req.body.startTime ? req.body.startTime : '';
-    let endTime = req.body.endTime ? req.body.endTime : '';
+    let startTime = req.body.startTime ? req.body.startTime : null;
+    let endTime = req.body.endTime ? req.body.endTime : null;
     let from = req.body.from ? req.body.from : '';
     let productName = req.body.productName ? req.body.productName : '';
     let to = req.body.to ? req.body.to : '';
@@ -29,18 +29,9 @@ router.post('/getRawMaterialBusiness', (req, res) => {
     let page = parseInt(req.body.page) - 1;
     let pageSize = parseInt(req.body.pageSize);
 
-    let queryParams = {
-        _id: {
-            $regex: _id
-        },
-        date: {
-            "$gte": new Date(startTime),
-            "$lte": new Date(endTime)
-        },
-    };
+    let queryParams = {};
 
     RawMaterialBusinessModels.count(queryParams).exec((err, count) => {
-        console.log(err, count)
         if (err) {
             res.json({
                 success: false,
@@ -59,50 +50,56 @@ router.post('/getRawMaterialBusiness', (req, res) => {
                     _id: -1
                 })
                 .populate([{
-                    path: 'from',
-                    select: {
-                        _id: 1,
-                        id: 1,
-                        name: 1,
-                        remark: 1
+                        path: 'from',
+                        select: {
+                            _id: 1,
+                            id: 1,
+                            name: 1,
+                            remark: 1
+                        },
+                        match: {
+                            name: {
+                                regex: from
+                            }
+                        }
                     },
-                }])
-                .populate([{
-                    path: 'productName',
-                    select: {
-                        _id: 1,
-                        id: 1,
-                        name: 1,
-                        remark: 1
+                    {
+                        path: 'productName',
+                        select: {
+                            _id: 1,
+                            id: 1,
+                            name: 1,
+                            remark: 1
+                        },
                     },
-                }])
-                .populate([{
-                    path: 'to',
-                    select: {
-                        _id: 1,
-                        id: 1,
-                        name: 1,
-                        remark: 1
+                    {
+                        path: 'to',
+                        select: {
+                            _id: 1,
+                            id: 1,
+                            name: 1,
+                            remark: 1
+                        },
                     },
-                }])
-                .populate([{
-                    path: 'rawMaterialCount.product',
-                    select: {
-                        _id: 1,
-                        id: 1,
-                        name: 1,
-                        remark: 1
+                    {
+                        path: 'rawMaterialCount.product',
+                        select: {
+                            _id: 1,
+                            id: 1,
+                            name: 1,
+                            remark: 1
+                        },
                     },
-                }])
-                .populate([{
-                    path: 'warehouse',
-                    select: {
-                        _id: 1,
-                        id: 1,
-                        name: 1,
-                        remark: 1
-                    },
-                }])
+                    {
+                        path: 'warehouse',
+                        select: {
+                            _id: 1,
+                            id: 1,
+                            name: 1,
+                            remark: 1
+                        },
+                    }
+                ])
                 .exec((err, doc) => {
                     if (err) {
                         res.json({
@@ -162,10 +159,10 @@ router.post('/addEditRMB', (req, res) => {
     let amount = count * unitPrice;
     let to = req.body.to ? req.body.to : pass = false;
     let usedTo = req.body.usedTo ? req.body.usedTo : '';
-    let payStatus = req.body.payStatus ? req.body.payStatus : pass = false;      //  0未付款、1部分付款、2已付款
+    let payStatus = req.body.payStatus ? req.body.payStatus : pass = false; //  0未付款、1部分付款、2已付款
     let rawMaterialCount = req.body.rawMaterialCount ? JSON.parse(req.body.rawMaterialCount) : '';
     let warehouse = req.body.warehouse ? req.body.warehouse : pass = false;
-    let KP = req.body.KP ? req.body.KP : pass = false;        //  0不需要，1需要未开，2需要已开
+    let KP = req.body.KP ? req.body.KP : pass = false; //  0不需要，1需要未开，2需要已开
     let type = req.body.type ? req.body.type : pass = false;
 
     if (!pass) {
