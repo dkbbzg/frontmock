@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fs = require("fs");
+const async = require("async");
 //  原料业务
 const RawMaterialBusinessModels = require('../../models/CRM/Business/RawMaterialBusinessModels');
 //  原料商
@@ -31,7 +32,67 @@ router.post('/getRawMaterialBusiness', (req, res) => {
 
     let queryParams = {};
 
+    if (from) {
+        RawMaterialSupplierModels.find({
+            $or: [
+                {
+                    id: {
+                        $regex: from
+                    }
+                },
+                {
+                    name: {
+                        $regex: from
+                    }
+                },
+                {
+                    address: {
+                        $regex: from
+                    }
+                },
+                {
+                    phone: {
+                        $regex: from
+                    }
+                },
+                {
+                    remark: {
+                        $regex: from
+                    }
+                }
+            ]
+        }, "_id",async function(err, from_data) {
+            if (err) {
+                res.json({
+                    success: false,
+                    message: err,
+                    data: {
+                        total: 0,
+                        results: []
+                    }
+                })
+            } else if (!from_data.length) {
+                res.json({
+                    success: true,
+                    message: '查询成功',
+                    data: {
+                        total: 0,
+                        results: []
+                    }
+                })
+            } else {
+                queryParams.from = { $in: [] };
+                from_data.map(item => {
+                    queryParams.from.$in.push(item._id);
+                })
+            }
+        })
+    }
+
+    console.log(queryParams, 2)
+
     RawMaterialBusinessModels.count(queryParams).exec((err, count) => {
+        console.log(queryParams, 3, count)
         if (err) {
             res.json({
                 success: false,
@@ -57,11 +118,6 @@ router.post('/getRawMaterialBusiness', (req, res) => {
                             name: 1,
                             remark: 1
                         },
-                        match: {
-                            name: {
-                                regex: from
-                            }
-                        }
                     },
                     {
                         path: 'productName',
