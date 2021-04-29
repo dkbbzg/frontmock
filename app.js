@@ -11,13 +11,13 @@ const SecretKey = 'CrMsEcReT';
 // 连接本地数据库
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
-mongoose.connect('mongodb://127.0.0.1:27017/CRM');
+mongoose.connect('mongodb://127.0.0.1:27017/ERP');
 const db = mongoose.connection;
 db.on('error', function (error) {
   console.log('Database frontmock connect error: ' + error)
 })
 db.once('open', function () {
-  console.log('Database CRM connect success!')
+  console.log('Database ERP connect success!')
 })
 
 // 创建项目实例
