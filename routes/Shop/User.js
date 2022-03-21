@@ -3,7 +3,7 @@ const router = express.Router();
 const fs = require("fs");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const UserModels = require('../../models/CRM/UserModels');
+const UserModels = require('../../models/Shop/UserModels');
 
 const salt = bcrypt.genSaltSync(10);
 

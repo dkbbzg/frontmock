@@ -11,13 +11,13 @@ const SecretKey = 'CrMsEcReT';
 // 连接本地数据库
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
-mongoose.connect('mongodb://127.0.0.1:27017/CRM');
+mongoose.connect('mongodb://127.0.0.1:27017/Shop');
 const db = mongoose.connection;
 db.on('error', function (error) {
   console.log('Database frontmock connect error: ' + error)
 })
 db.once('open', function () {
-  console.log('Database CRM connect success!')
+  console.log('Database Shop connect success!')
 })
 
 // 创建项目实例
@@ -53,7 +53,7 @@ app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
-const UserModels = require('./models/CRM/UserModels');
+const UserModels = require('./models/Shop/UserModels');
 let isRevokedCallback = function (req, payload, done) {
   let _id = payload._id;
 
@@ -83,7 +83,7 @@ app.use(expressJwt({
   },
   isRevoked: isRevokedCallback
 }).unless({
-  path: ['/crm/user/login'] // 指定路径不经过 Token 解析
+  path: ['/shop/user/login'] // 指定路径不经过 Token 解析
 }))
 
 // 加载路由控制
@@ -106,11 +106,11 @@ const top20DomainRouter = require('./routes/Top20Domain/Top20Domain'); // TOP 20
 const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai'); // 湖南一键应急 重保工作台
 // 重庆一键应急
 const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu'); // 重庆一键应急 域名封堵
-// CRM
-const CRM_User = require('./routes/CRM/User');
-const CRM_Category = require('./routes/CRM/Category');
-const CRM_People = require('./routes/CRM/People');
-const CRM_Business = require('./routes/CRM/Business');
+// Shop
+const CRM_User = require('./routes/Shop/User');
+const CRM_Category = require('./routes/Shop/Category');
+const CRM_People = require('./routes/Shop/People');
+const CRM_Business = require('./routes/Shop/Business');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
@@ -127,11 +127,11 @@ app.use('/company', companyRouter);
 app.use('/home', homeRouter);
 app.use('/product', productRouter);
 app.use('/front', frontRouter);
-// CRM
-app.use('/crm/user', CRM_User);
-app.use('/crm/category', CRM_Category);
-app.use('/crm/people', CRM_People);
-app.use('/crm/business', CRM_Business);
+// Shop
+app.use('/Shop/user', CRM_User);
+app.use('/Shop/category', CRM_Category);
+app.use('/Shop/people', CRM_People);
+app.use('/Shop/business', CRM_Business);
 
 // 湖南一键应急 路由
 app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai); // 湖南一键应急 重保工作台

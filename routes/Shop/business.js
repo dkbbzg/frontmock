@@ -3,17 +3,20 @@ const router = express.Router();
 const fs = require("fs");
 const async = require("async");
 //  原料业务
-const RawMaterialBusinessModels = require('../../models/CRM/Business/RawMaterialBusinessModels');
+const RawMaterialBusinessModels = require('../../models/Shop/Business/RawMaterialBusinessModels');
 //  原料商
-const RawMaterialSupplierModels = require('../../models/CRM/People/RawMaterialSupplierModels');
+const RawMaterialSupplierModels = require('../../models/Shop/People/SupplierModels');
 //  织造厂
-const WeavingMillModels = require('../../models/CRM/People/WeavingMillModels');
+const WeavingMillModels = require('../../models/Shop/People/WeavingMillModels');
 //  客户
-const CustomerModels = require('../../models/CRM/People/CustomerModels');
+const CustomerModels = require('../../models/Shop/People/CustomerModels');
 //  仓库管理
-const WarehouseManagementModels = require('../../models/CRM/People/WarehouseManagementModels');
+const WarehouseManagementModels = require('../../models/Shop/People/WarehouseManagementModels');
 //  坯布品类
-const FabricCategoryModels = require('../../models/CRM/Category/FabricCategoryModels');
+const FabricCategoryModels = require('../../models/Shop/Category/FabricCategoryModels');
+
+
+
 
 
 //  原料业务
