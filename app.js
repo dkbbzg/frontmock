@@ -6,19 +6,96 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 
+const https = require('https');
+const fs = require('fs');
+const superagent = require('superagent'); // http 方面的库，可以发起 get 或 post 请求
+const cheerio = require('cheerio'); // 相当于jquery
+
 // 连接本地数据库
-// const mongoose = require('mongoose');
-// mongoose.connect('mongodb://127.0.0.1:27017/frontmock');
-// const db = mongoose.connection;
-// db.on('error', function (error) {
-//   console.log('Database frontmock connect error: ' + error)
-// })
-// db.once('open', function () {
-//   console.log('Database frontmock connect success!')
-// })
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1:27017/novel');
+const db = mongoose.connection;
+db.on('error', function (error) {
+  console.log('Database novel connect error: ' + error)
+})
+db.once('open', function () {
+  console.log('Database novel connect success!')
+})
 
 // 创建项目实例
 var app = express();
+
+// 爬虫
+// 创建mongo model
+const Schema = mongoose.Schema;
+const NovelSchema = new Schema({
+  "bookName": String,
+  "bookId": String,
+  "CharacterId": Number,
+  "title": String,
+  "href": String,
+  "content": String,
+});
+const NovelModels = mongoose.model('novel', NovelSchema, 'novels')
+// 爬虫的 URL 信息
+const opt = {
+  hostname: 'https://www.xbiquwx.la',
+  bookId: '/0_722',
+  CharacterId: '',
+};
+app.get('/', function (req, res, next) {
+  superagent.get(opt.hostname + opt.bookId)
+    .end(async function (err, sres) {
+      if (err) {
+        return next(errr);
+      }
+      const $ = cheerio.load(sres.text);
+      let items = [];
+      let html = '';
+      $('#list a').each(async function (idx, element) {
+        let $element = $(element);
+        let item = {
+          bookName: '贵妃起居注',
+          bookId: '0_722',
+          CharacterId: `${parseInt($element.attr('href').split('.')[0])}`,
+          title: $element.attr('title'),
+          href: opt.hostname + opt.bookId + '/' + $element.attr('href')
+        }
+        html += `<h1 style="text-align: center;">${item.title}</h1>`;
+        html += `<div style="width: 100%;text-align: center;font-size: 14px;">${item.href}</h1>`;
+
+        await superagent.get(item.href).end(async function (err, eres) {
+          if (err) {
+            return next(errr);
+          }
+          let content = '';
+          content += `<h1 style="text-align: center;">${item.title}</h1>`;
+          content += '<div class="content">';
+          const _$ = cheerio.load(eres.text);
+          content += _$('#content').html();
+          content += '</div>';
+          item.content = content;
+          items.push(item);
+          let _data = new NovelModels(item);
+          await _data.save(function (err, res) {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(item.title);
+            }
+          })
+        })
+      });
+      res.send('spidering');
+    });
+});
+app.get('/fetch', function (req, res, next) {
+  NovelModels.find({}).sort({CharacterId: 1}).then((data) => {
+    res.json({
+      data: data
+    })
+  })
+})
 
 //设置允许跨域访问该服务.
 app.all('*', function (req, res, next) {
@@ -38,8 +115,8 @@ app.set('view engine', 'pug');
 // 定义日志和输出级别
 app.use(logger('dev'));
 // 定义数据解析器
-app.use(bodyParser.json({limit:'5mb'})); 
-app.use(bodyParser.urlencoded({extended:true, limit:'5mb'}));
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 // 定义cookie解析器
 app.use(cookieParser());
 // 定义静态文件目录
