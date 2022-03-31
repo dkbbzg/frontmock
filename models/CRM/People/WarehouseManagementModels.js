@@ -9,10 +9,7 @@ const WarehouseManagementSchema = new Schema({
     "phone": String, //  联系方式
     "remark": String, //  备注
     "products": [{
-        "product": {
-            type: Schema.Types.ObjectId,
-            ref: 'rawMaterial_category'
-        },
+        "product_id": Schema.Types.ObjectId,
         "category": String,
         "now_count": Number,
         "out_count": Number,

@@ -94,18 +94,6 @@ const companyRouter = require('./routes/company');
 const homeRouter = require('./routes/home');
 const productRouter = require('./routes/product');
 const frontRouter = require('./routes/front');
-const monitorviewRouter = require('./routes/monitor/monitorview'); // 监控试图概览接口
-const domainNameBlacklistRouter = require('./routes/domainNameBlacklist/domainNameBlacklist'); // 域名黑名单接口
-const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy'); // 区域配置
-const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController'); // 菜单配置
-const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController'); // 角色管理
-const analysisRouter = require('./routes/analysis/analysis'); // 用户质量分析
-const top20DomainRouter = require('./routes/Top20Domain/Top20Domain'); // TOP 20 域名
-
-// 湖南一键应急
-const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai'); // 湖南一键应急 重保工作台
-// 重庆一键应急
-const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu'); // 重庆一键应急 域名封堵
 // CRM
 const CRM_User = require('./routes/CRM/User');
 const CRM_Category = require('./routes/CRM/Category');
@@ -114,13 +102,6 @@ const CRM_Business = require('./routes/CRM/Business');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
-app.use('/monitorview', monitorviewRouter); // 监控试图概览接口
-app.use('/blackList', domainNameBlacklistRouter); // 域名黑名单接口
-app.use('/strategy', schedpolicyRouter); // 区域配置
-app.use('/interfaceController', interfaceControllerRouter); // 菜单配置
-app.use('/interfaceRoleController', InterfaceRoleControllerRouter); // 角色管理
-app.use('/analysis', analysisRouter); // 角色管理
-app.use('/top20', top20DomainRouter); // TOP 20 域名
 app.use('/users', usersRouter);
 app.use('/upload', uploadRouter);
 app.use('/company', companyRouter);
@@ -132,11 +113,6 @@ app.use('/crm/user', CRM_User);
 app.use('/crm/category', CRM_Category);
 app.use('/crm/people', CRM_People);
 app.use('/crm/business', CRM_Business);
-
-// 湖南一键应急 路由
-app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai); // 湖南一键应急 重保工作台
-// 重庆一键应急 路由
-app.use('/YuMingFengDu', CQ_YuMingFengDu); // 重庆一键应急 域名封堵
 
 //  解析TOKEN失败
 app.use(function (err, req, res, next) {

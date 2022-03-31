@@ -326,7 +326,7 @@ router.post('/getWeavingMill', (req, res) => {
     })
 })
 //  删除 织造厂单位
-router.post('/deleteWM', (req, res) => {
+router.post('/deleteWeavingMill', (req, res) => {
     let ids = req.body.ids.split(',');
     let deleteParams = {
         _id: {
@@ -349,7 +349,7 @@ router.post('/deleteWM', (req, res) => {
 
 })
 // 新增编辑 织造厂单位 弹出框点击 确定 操作
-router.post('/addEditWM', (req, res) => {
+router.post('/addEditWeavingMill', (req, res) => {
     let real_id = req.body.real_id ? req.body.real_id : '';
     let id = req.body.id;
     let address = req.body.address ? req.body.address : '';
@@ -688,13 +688,13 @@ router.post('/addEditCustomer', (req, res) => {
 //  仓库管理
 //  获取仓库管理表格数据
 router.post('/getWarehouseManagement', (req, res) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let address = req.body.address;
-    let phone = req.body.phone;
-    let remark = req.body.remark;
-    let page = parseInt(req.body.page) - 1;
-    let pageSize = parseInt(req.body.pageSize);
+    let id = req.body.id ? req.body.id : '';
+    let name = req.body.name ? req.body.name : '';
+    let address = req.body.address ? req.body.address : '';
+    let phone = req.body.phone ? req.body.phone : '';
+    let remark = req.body.remark ? req.body.remark : '';
+    let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
+    let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
 
     let queryParams = {
         id: {
@@ -758,7 +758,7 @@ router.post('/getWarehouseManagement', (req, res) => {
     })
 })
 //  删除 仓库单位
-router.post('/deleteWM', (req, res) => {
+router.post('/deleteWarehouse', (req, res) => {
     let ids = req.body.ids.split(',');
     let deleteParams = {
         _id: {
@@ -787,7 +787,7 @@ router.post('/deleteWM', (req, res) => {
     // })
 })
 //  新增编辑 仓库单位 弹出框点击 确定 操作
-router.post('/addEditWM', (req, res) => {
+router.post('/addEditWarehouse', (req, res) => {
     let real_id = req.body.real_id;
     let id = req.body.id;
     let address = req.body.address;

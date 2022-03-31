@@ -17,8 +17,8 @@ router.post('/getRawMaterialCategory', (req, res) => {
     let id = req.body.id ? req.body.id : '';
     let name = req.body.name ? req.body.name : '';
     let remark = req.body.remark ? req.body.remark : '';
-    let page = parseInt(req.body.page) - 1;
-    let pageSize = parseInt(req.body.pageSize);
+    let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
+    let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
 
     let queryParams = {
         id: {
@@ -253,11 +253,11 @@ router.post('/getRMCs', (req, res) => {
 //  坯布品类
 //  获取坯布品类表格数据
 router.post('/getFabricCategory', (req, res) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let remark = req.body.remark;
-    let page = parseInt(req.body.page) - 1;
-    let pageSize = parseInt(req.body.pageSize);
+    let id = req.body.id ? req.body.id : '';
+    let name = req.body.name ? req.body.name : '';
+    let remark = req.body.remark ? req.body.remark : '';
+    let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
+    let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
 
     let queryParams = {
         id: {
@@ -449,11 +449,11 @@ router.post('/addEditFC', (req, res) => {
 //  成品布品类
 //  获取成品布品类表格数据
 router.post('/getFinishedFabricCategory', (req, res) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let remark = req.body.remark;
-    let page = parseInt(req.body.page) - 1;
-    let pageSize = parseInt(req.body.pageSize);
+    let id = req.body.id ? req.body.id : '';
+    let name = req.body.name ? req.body.name : '';
+    let remark = req.body.remark ? req.body.remark : '';
+    let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
+    let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
 
     let queryParams = {
         id: {
@@ -639,11 +639,11 @@ router.post('/addEditFFC', (req, res) => {
 //  颜色品类
 //  获取颜色品类表格数据
 router.post('/getColorCategory', (req, res) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let remark = req.body.remark;
-    let page = parseInt(req.body.page) - 1;
-    let pageSize = parseInt(req.body.pageSize);
+    let id = req.body.id ? req.body.id : '';
+    let name = req.body.name ? req.body.name : '';
+    let remark = req.body.remark ? req.body.remark : '';
+    let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
+    let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
 
     let queryParams = {
         id: {
