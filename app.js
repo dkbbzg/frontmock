@@ -24,6 +24,30 @@ db.once('open', function () {
 
 // 创建项目实例
 var app = express();
+//设置允许跨域访问该服务.
+app.all('*', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With, tokenUuid, usertoken, token');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Expose-Headers', 'tokenUuid')
+  res.header('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+  next();
+});
+
+// 定义EJS模板引擎和模板文件位置，也可以使用jade或其他模型引擎
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+// 定义日志和输出级别
+app.use(logger('dev'));
+// 定义数据解析器
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+// 定义cookie解析器
+app.use(cookieParser());
+// 定义静态文件目录
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 爬虫
 // 创建mongo model
@@ -69,11 +93,8 @@ app.get('/', function (req, res, next) {
             return next(errr);
           }
           let content = '';
-          content += `<h1 style="text-align: center;">${item.title}</h1>`;
-          content += '<div class="content">';
           const _$ = cheerio.load(eres.text);
           content += _$('#content').html();
-          content += '</div>';
           item.content = content;
           items.push(item);
           let _data = new NovelModels(item);
@@ -89,38 +110,36 @@ app.get('/', function (req, res, next) {
       res.send('spidering');
     });
 });
-app.get('/fetch', function (req, res, next) {
-  NovelModels.find({}).sort({CharacterId: 1}).then((data) => {
+app.post('/novel/fetch', function (req, res, next) {
+  let page = parseInt(req.body.page);
+  let pageSize = parseInt(req.body.pageSize);
+  NovelModels.countDocuments({}, (error, count) => {
+    if (error) {
+      logger.error(`user::/list::error:${JSON.stringify(error)}`);
+      res.json({
+        status: 400,
+        msg: JSON.stringify(error)
+      });
+    } else {
+      NovelModels.find({}).sort({ CharacterId: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title').exec((err, doc) => {
+        res.json({
+          list: doc,
+          total: count,
+          status: 200,
+        })
+      })
+    }
+  })
+})
+app.post('/novel/fetchContent', function (req, res, next) {
+  let id = req.body.id;
+  NovelModels.findById(id).select('bookName title content').exec((err, doc) => {
     res.json({
-      data: data
+      data: doc,
+      status: 200,
     })
   })
 })
-
-//设置允许跨域访问该服务.
-app.all('*', function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With, tokenUuid, usertoken, token');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Expose-Headers', 'tokenUuid')
-  res.header('Content-Type', 'application/json; charset=utf-8');
-  next();
-});
-
-// 定义EJS模板引擎和模板文件位置，也可以使用jade或其他模型引擎
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
-// 定义日志和输出级别
-app.use(logger('dev'));
-// 定义数据解析器
-app.use(bodyParser.json({ limit: '5mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
-// 定义cookie解析器
-app.use(cookieParser());
-// 定义静态文件目录
-app.use(express.static(path.join(__dirname, 'public')));
 
 // 加载路由控制
 const indexRouter = require('./routes/index');
