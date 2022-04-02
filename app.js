@@ -52,6 +52,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 爬虫
 // 创建mongo model
 const Schema = mongoose.Schema;
+const BookSchema = new Schema({
+  "bookName": String,
+  "bookId": String,
+  "bookBg": String,
+  "author": String,
+  "status": String,
+  "category": String,
+  "update_time": String,
+  "description": String,
+  "latestChapterName": String,
+  "latestChapterUrl": String,
+  "latestvisited": Date,
+});
+const BookModels = mongoose.model('book', BookSchema, 'books');
+
 const NovelSchema = new Schema({
   "bookName": String,
   "bookId": String,
@@ -60,18 +75,18 @@ const NovelSchema = new Schema({
   "href": String,
   "content": String,
 });
-const NovelModels = mongoose.model('novel', NovelSchema, 'novels')
+const NovelModels = mongoose.model('novel', NovelSchema, 'novels');
 // 爬虫的 URL 信息
 const opt = {
   hostname: 'https://www.xbiquwx.la',
-  bookId: '/0_722',
+  bookId: '0_722',
   CharacterId: '',
 };
 app.get('/', function (req, res, next) {
-  superagent.get(opt.hostname + opt.bookId)
+  superagent.get(`${opt.hostname}/${opt.bookId}`)
     .end(async function (err, sres) {
       if (err) {
-        return next(errr);
+        return next(err);
       }
       const $ = cheerio.load(sres.text);
       let items = [];
@@ -83,14 +98,14 @@ app.get('/', function (req, res, next) {
           bookId: '0_722',
           CharacterId: `${parseInt($element.attr('href').split('.')[0])}`,
           title: $element.attr('title'),
-          href: opt.hostname + opt.bookId + '/' + $element.attr('href')
+          href: opt.hostname + '/' + opt.bookId + '/' + $element.attr('href')
         }
         html += `<h1 style="text-align: center;">${item.title}</h1>`;
         html += `<div style="width: 100%;text-align: center;font-size: 14px;">${item.href}</h1>`;
 
         await superagent.get(item.href).end(async function (err, eres) {
           if (err) {
-            return next(errr);
+            return next(err);
           }
           let content = '';
           const _$ = cheerio.load(eres.text);
@@ -110,10 +125,38 @@ app.get('/', function (req, res, next) {
       res.send('spidering');
     });
 });
+app.get('/spiderBook', function (req, res, next) {
+  superagent.get(`${opt.hostname}/${opt.bookId}`)
+    .end(async function (err, sres) {
+      if (err) {
+        return next(err);
+      }
+      const $ = cheerio.load(sres.text);
+      let obj = {};
+      obj.bookName = $("meta[property=og:novel:book_name]").attr('content');
+      obj.bookId = opt.bookId;
+      obj.bookBg = $("meta[property=og:image]").attr('content');
+      obj.author = $("meta[property=og:novel:author]").attr('content');
+      obj.status = $("meta[property=og:novel:status]").attr('content');
+      obj.category = $("meta[property=og:novel:category]").attr('content');
+      obj.update_time = $("meta[property=og:novel:update_time]").attr('content');
+      obj.description = $("meta[property=og:description]").attr('content');
+      obj.latestChapterName = $("meta[property=og:novel:latest_chapter_name]").attr('content');
+      obj.latestChapterUrl = $("meta[property=og:novel:latest_chapter_url]").attr('content').split('/').pop().split('.html')[0];
+      obj.latestvisited = new Date;
+      BookModels.update({ bookName: obj.bookName }, obj, { multi: true, upsert: true }, function (err, docs) {
+        if (err) console.log(err);
+        console.log('更改成功');
+      })
+
+      res.send('spidering');
+    });
+})
 app.post('/novel/fetch', function (req, res, next) {
+  let bookId = req.body.bookId;
   let page = parseInt(req.body.page);
   let pageSize = parseInt(req.body.pageSize);
-  NovelModels.countDocuments({}, (error, count) => {
+  NovelModels.countDocuments({ bookId: bookId }, (error, count) => {
     if (error) {
       logger.error(`user::/list::error:${JSON.stringify(error)}`);
       res.json({
@@ -121,7 +164,7 @@ app.post('/novel/fetch', function (req, res, next) {
         msg: JSON.stringify(error)
       });
     } else {
-      NovelModels.find({}).sort({ CharacterId: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title').exec((err, doc) => {
+      NovelModels.find({ bookId: bookId }).sort({ CharacterId: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId').exec((err, doc) => {
         res.json({
           list: doc,
           total: count,
@@ -131,9 +174,29 @@ app.post('/novel/fetch', function (req, res, next) {
     }
   })
 })
-app.post('/novel/fetchContent', function (req, res, next) {
+app.post('/novel/fetchBooks', function (req, res, next) {
+  BookModels.find({}).sort({ latestvisited: 1 }).exec((err, doc) => {
+    res.json({
+      list: doc,
+      status: 200,
+    })
+  })
+})
+app.post('/novel/removeBook', function (req, res, next) {
   let id = req.body.id;
-  NovelModels.findById(id).select('bookName title content').exec((err, doc) => {
+  BookModels.remove({ _id: id }, function (err) {
+    if (err) return handleError(err);
+    res.json({
+      status: 200,
+      msg: '已移出书架'
+    })
+  })
+})
+app.post('/novel/fetchContent', function (req, res, next) {
+  let bookId = req.body.bookId;
+  let CharacterId = req.body.CharacterId;
+  console.log(bookId, CharacterId)
+  NovelModels.findOne({ bookId: bookId, CharacterId: CharacterId }).select('bookId bookName title content').exec((err, doc) => {
     res.json({
       data: doc,
       status: 200,
