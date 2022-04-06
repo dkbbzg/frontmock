@@ -82,7 +82,7 @@ const opt = {
   bookId: '0_722',
   CharacterId: '',
 };
-app.get('/', function (req, res, next) {
+app.get('/spiderCharacter', function (req, res, next) {
   superagent.get(`${opt.hostname}/${opt.bookId}`)
     .end(async function (err, sres) {
       if (err) {
