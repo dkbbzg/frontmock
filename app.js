@@ -8,8 +8,6 @@ const bodyParser = require('body-parser');
 
 const https = require('https');
 const fs = require('fs');
-const superagent = require('superagent'); // http 方面的库，可以发起 get 或 post 请求
-const cheerio = require('cheerio'); // 相当于jquery
 
 // 连接本地数据库
 const mongoose = require('mongoose');
@@ -19,7 +17,7 @@ db.on('error', function (error) {
   console.log('Database novel connect error: ' + error)
 })
 db.once('open', function () {
-  console.log('Database novel connect success!')
+  console.log('------------------------------------------------\nDatabase novel connect success!\n------------------------------------------------')
 })
 
 // 创建项目实例
@@ -49,208 +47,13 @@ app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 爬虫
-// 创建mongo model
-const Schema = mongoose.Schema;
-const BookSchema = new Schema({
-  "bookName": String,
-  "bookId": String,
-  "bookBg": String,
-  "author": String,
-  "status": String,
-  "category": String,
-  "update_time": String,
-  "description": String,
-  "latestChapterName": String,
-  "latestChapterUrl": String,
-  "latestvisited": Date,
-});
-const BookModels = mongoose.model('book', BookSchema, 'books');
-
-const NovelSchema = new Schema({
-  "bookName": String,
-  "bookId": String,
-  "CharacterId": Number,
-  "title": String,
-  "href": String,
-  "content": String,
-});
-const NovelModels = mongoose.model('novel', NovelSchema, 'novels');
-// 爬虫的 URL 信息
-const opt = {
-  hostname: 'https://www.xbiquwx.la',
-  bookId: '0_722',
-  CharacterId: '',
-};
-app.get('/spiderCharacter', function (req, res, next) {
-  superagent.get(`${opt.hostname}/${opt.bookId}`)
-    .end(async function (err, sres) {
-      if (err) {
-        return next(err);
-      }
-      const $ = cheerio.load(sres.text);
-      let items = [];
-      let html = '';
-      $('#list a').each(async function (idx, element) {
-        let $element = $(element);
-        let item = {
-          bookName: '贵妃起居注',
-          bookId: '0_722',
-          CharacterId: `${parseInt($element.attr('href').split('.')[0])}`,
-          title: $element.attr('title'),
-          href: opt.hostname + '/' + opt.bookId + '/' + $element.attr('href')
-        }
-        html += `<h1 style="text-align: center;">${item.title}</h1>`;
-        html += `<div style="width: 100%;text-align: center;font-size: 14px;">${item.href}</h1>`;
-
-        await superagent.get(item.href).end(async function (err, eres) {
-          if (err) {
-            return next(err);
-          }
-          let content = '';
-          const _$ = cheerio.load(eres.text);
-          content += _$('#content').html();
-          item.content = content;
-          items.push(item);
-          let _data = new NovelModels(item);
-          await _data.save(function (err, res) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log(item.title);
-            }
-          })
-        })
-      });
-      res.send('spidering');
-    });
-});
-app.get('/spiderBook', function (req, res, next) {
-  superagent.get(`${opt.hostname}/${opt.bookId}`)
-    .end(async function (err, sres) {
-      if (err) {
-        return next(err);
-      }
-      const $ = cheerio.load(sres.text);
-      let obj = {};
-      obj.bookName = $("meta[property=og:novel:book_name]").attr('content');
-      obj.bookId = opt.bookId;
-      obj.bookBg = $("meta[property=og:image]").attr('content');
-      obj.author = $("meta[property=og:novel:author]").attr('content');
-      obj.status = $("meta[property=og:novel:status]").attr('content');
-      obj.category = $("meta[property=og:novel:category]").attr('content');
-      obj.update_time = $("meta[property=og:novel:update_time]").attr('content');
-      obj.description = $("meta[property=og:description]").attr('content');
-      obj.latestChapterName = $("meta[property=og:novel:latest_chapter_name]").attr('content');
-      obj.latestChapterUrl = $("meta[property=og:novel:latest_chapter_url]").attr('content').split('/').pop().split('.html')[0];
-      obj.latestvisited = new Date;
-      BookModels.update({ bookName: obj.bookName }, obj, { multi: true, upsert: true }, function (err, docs) {
-        if (err) console.log(err);
-        console.log('更改成功');
-      })
-
-      res.send('spidering');
-    });
-})
-app.post('/novel/fetch', function (req, res, next) {
-  let bookId = req.body.bookId;
-  let page = parseInt(req.body.page);
-  let pageSize = parseInt(req.body.pageSize);
-  NovelModels.countDocuments({ bookId: bookId }, (error, count) => {
-    if (error) {
-      logger.error(`user::/list::error:${JSON.stringify(error)}`);
-      res.json({
-        status: 400,
-        msg: JSON.stringify(error)
-      });
-    } else {
-      NovelModels.find({ bookId: bookId }).sort({ CharacterId: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId').exec((err, doc) => {
-        res.json({
-          list: doc,
-          total: count,
-          status: 200,
-        })
-      })
-    }
-  })
-})
-app.post('/novel/fetchBooks', function (req, res, next) {
-  BookModels.find({}).sort({ latestvisited: 1 }).exec((err, doc) => {
-    res.json({
-      list: doc,
-      status: 200,
-    })
-  })
-})
-app.post('/novel/removeBook', function (req, res, next) {
-  let id = req.body.id;
-  BookModels.remove({ _id: id }, function (err) {
-    if (err) return handleError(err);
-    res.json({
-      status: 200,
-      msg: '已移出书架'
-    })
-  })
-})
-app.post('/novel/fetchContent', function (req, res, next) {
-  let bookId = req.body.bookId;
-  let CharacterId = req.body.CharacterId;
-  console.log(bookId, CharacterId)
-  NovelModels.findOne({ bookId: bookId, CharacterId: CharacterId }).select('bookId bookName title content').exec((err, doc) => {
-    res.json({
-      data: doc,
-      status: 200,
-    })
-  })
-})
-
 // 加载路由控制
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const uploadRouter = require('./routes/upload');
-const companyRouter = require('./routes/company');
-const homeRouter = require('./routes/home');
-const productRouter = require('./routes/product');
-const frontRouter = require('./routes/front');
-const monitorviewRouter = require('./routes/monitor/monitorview');  // 监控试图概览接口
-const domainNameBlacklistRouter = require('./routes/domainNameBlacklist/domainNameBlacklist');  // 域名黑名单接口
-const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy');  // 区域配置
-const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController');  // 菜单配置
-const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController');  // 角色管理
-const analysisRouter = require('./routes/analysis/analysis');  // 用户质量分析
-const top20DomainRouter = require('./routes/Top20Domain/Top20Domain');  // TOP 20 域名
-
-// 湖南一键应急
-const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai');  // 湖南一键应急 重保工作台
-// 重庆一键应急
-const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu');  // 重庆一键应急 域名封堵
-// CRM
-const CRM_User = require('./routes/CRM/User');
-const CRM_Category = require('./routes/CRM/Category');
+const spiderRouter = require('./routes/spider');
+const novelRouter = require('./routes/novel');
 
 // 匹配路径和路由
-app.use('/', indexRouter);
-app.use('/monitorview', monitorviewRouter);  // 监控试图概览接口
-app.use('/blackList', domainNameBlacklistRouter);  // 域名黑名单接口
-app.use('/strategy', schedpolicyRouter);  // 区域配置
-app.use('/interfaceController', interfaceControllerRouter);  // 菜单配置
-app.use('/interfaceRoleController', InterfaceRoleControllerRouter);  // 角色管理
-app.use('/analysis', analysisRouter);  // 角色管理
-app.use('/top20', top20DomainRouter);  // TOP 20 域名
-app.use('/users', usersRouter);
-app.use('/upload', uploadRouter);
-app.use('/company', companyRouter);
-app.use('/home', homeRouter);
-app.use('/product', productRouter);
-app.use('/front', frontRouter);
-// CRM
-app.use('/crm/user', CRM_User);
-app.use('/crm/category', CRM_Category);
-
-// 湖南一键应急 路由
-app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai);  // 湖南一键应急 重保工作台
-// 重庆一键应急 路由
-app.use('/YuMingFengDu', CQ_YuMingFengDu);  // 重庆一键应急 域名封堵
+app.use('/spider', spiderRouter);
+app.use('/novel', novelRouter);
 
 // 404错误处理
 app.use(function (req, res, next) {
