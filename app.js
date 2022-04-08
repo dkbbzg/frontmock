@@ -52,8 +52,8 @@ const spiderRouter = require('./routes/spider');
 const novelRouter = require('./routes/novel');
 
 // 匹配路径和路由
-app.use('/spider', spiderRouter);
-app.use('/novel', novelRouter);
+app.use('/basic-api/spider', spiderRouter);
+app.use('/basic-api/novel', novelRouter);
 
 // 404错误处理
 app.use(function (req, res, next) {
