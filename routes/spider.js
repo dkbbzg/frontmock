@@ -32,7 +32,16 @@ router.post('/searchBookFromxbiquwx', function (req, res, next) {
             obj.wordNumber = el.eq(3).text();
             obj.latestUpdate = el.eq(4).text();
             obj.status = el.eq(5).text();
-            list.push(obj);
+            BookModels.countDocuments({ bookId: obj.bookId }, (error, count) => {
+              if (error) {
+                logger.error(`user::/list::error:${JSON.stringify(error)}`);
+              } else if (count) {
+                obj.isExist = true;
+              } else {
+                obj.isExist = false;
+              }
+              list.push(obj);
+            });
           }
         })
       }
