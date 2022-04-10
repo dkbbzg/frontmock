@@ -18,7 +18,22 @@ router.post('/fetchBooks', function (req, res, next) {
 // 移除书架上某本书籍
 router.post('/removeBook', function (req, res, next) {
   let id = req.body.id;
-  BookModels.remove({ _id: id }, function (err) {
+  let bookId = req.body.bookId;
+  let bookName = req.body.bookName;
+  let author = req.body.author;
+  let params = {};
+  if (id) {
+    params = {
+      _id: id
+    }
+  } else {
+    params = {
+      bookId,
+      bookName,
+      author
+    }
+  }
+  BookModels.remove(params, function (err) {
     if (err) return handleError(err);
     res.json({
       status: 200,
