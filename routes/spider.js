@@ -112,6 +112,21 @@ router.post('/spiderBook', function (req, res, next) {
       })
     });
 })
+// 将小说内容更新在数据库中
+async function updateNovels(item) {
+  let update = await new Promise(function (resolve, reject) {
+    NovelModels.update({ CharacterId: item.CharacterId }, item, { multi: true, upsert: true }, function (err, docs) {
+      if (err) {
+        console.log(err, item.title);
+        reject(err);
+      }
+      else {
+        resolve(docs);
+      }
+    })
+  })
+  return update;
+}
 // 获取每个章节的内容
 router.post('/spiderCharacter', function (req, res, next) {
   let hostname = req.body.hostname;
@@ -132,9 +147,11 @@ router.post('/spiderCharacter', function (req, res, next) {
           bookId: bookId,
           CharacterId: `${parseInt($element.attr('href').split('.')[0])}`,
           title: $element.attr('title'),
-          href: url + '/' + $element.attr('href')
+          href: url + '/' + $element.attr('href'),
+          no: idx
         }
 
+        console.log(item.href)
         await superagent.get(item.href).end(async function (err, eres) {
           if (err) {
             return next(err);
@@ -144,25 +161,29 @@ router.post('/spiderCharacter', function (req, res, next) {
           content += _$('#content').html();
           item.content = content;
 
-          // NovelModels.update({ bookId: item.bookId }, item, { multi: true, upsert: true }, function (err, docs) {
-          //   if (err) console.log(err, item.url);
-          //   console.log('获取每个章节的内容');
-          // })
-
-          let _data = new NovelModels(item);
-          await _data.save(function (err, res) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log(item.title);
-            }
+          await updateNovels(item).then(doc => {
+            console.log(doc);
+          }).catch(err => {
+            console.log('spiderCharacter: error /n', err);
           })
+          
+          if (idx == $('#list a').length - 1) {
+            res.json({
+              msg: `正在获取小说${bookName}-${author}的章节`,
+              status: 200,
+            })
+          }
+
+          // let _data = new NovelModels(item);
+          // await _data.save(function (err, res) {
+          //   if (err) {
+          //     console.log(err);
+          //   } else {
+          //     console.log(item.title);
+          //   }
+          // })
         })
       });
-      res.json({
-        msg: `正在获取小说${bookName}-${author}的章节`,
-        status: 200,
-      })
     });
 });
 

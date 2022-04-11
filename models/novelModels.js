@@ -8,6 +8,7 @@ const NovelSchema = new Schema({
     "title": String,
     "href": String,
     "content": String,
+    "no": Number,
 });
 const NovelModels = mongoose.model('novel', NovelSchema, 'novels');
 module.exports = NovelModels

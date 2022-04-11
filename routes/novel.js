@@ -55,7 +55,7 @@ router.post('/fetch', function (req, res, next) {
         msg: JSON.stringify(error)
       });
     } else {
-      NovelModels.find({ bookId: bookId }).sort({ CharacterId: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId').exec((err, doc) => {
+      NovelModels.find({ bookId: bookId }).sort({ no: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId').exec((err, doc) => {
         res.json({
           list: doc,
           total: count,
