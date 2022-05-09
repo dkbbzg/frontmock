@@ -17,27 +17,20 @@ router.post('/fetchBooks', function (req, res, next) {
 
 // 移除书架上某本书籍
 router.post('/removeBook', function (req, res, next) {
-  let id = req.body.id;
   let bookId = req.body.bookId;
   let bookName = req.body.bookName;
-  let author = req.body.author;
-  let params = {};
-  if (id) {
-    params = {
-      _id: id
-    }
-  } else {
-    params = {
-      bookId,
-      bookName,
-      author
-    }
-  }
+  let params = {
+    bookId,
+    bookName
+  };
   BookModels.remove(params, function (err) {
     if (err) return handleError(err);
-    res.json({
-      status: 200,
-      msg: '已移出书架'
+    NovelModels.remove(params, function (err) {
+      if (err) return handleError(err);
+      res.json({
+        status: 200,
+        msg: '已移出书架'
+      })
     })
   })
 })
@@ -55,7 +48,7 @@ router.post('/fetch', function (req, res, next) {
         msg: JSON.stringify(error)
       });
     } else {
-      NovelModels.find({ bookId: bookId }).sort({ no: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId').exec((err, doc) => {
+      NovelModels.find({ bookId: bookId }).sort({ no: 1 }).skip((page - 1) * pageSize).limit(pageSize).select('bookName href title CharacterId no').exec((err, doc) => {
         res.json({
           list: doc,
           total: count,
@@ -66,12 +59,22 @@ router.post('/fetch', function (req, res, next) {
   })
 })
 
+// 查询小说最后一个章节
+router.post('/fetchLatestNo', function (req, res, next) {
+  let bookId = req.body.bookId;
+  NovelModels.find({ bookId: bookId }).sort({ no: -1 }).limit(1).select('no').exec((err, doc) => {
+    res.json({
+      data: doc[0],
+      status: 200,
+    })
+  })
+})
+
 // 查询小说某个章节的具体内容
 router.post('/fetchContent', function (req, res, next) {
   let bookId = req.body.bookId;
-  let CharacterId = req.body.CharacterId;
-  console.log(bookId, CharacterId)
-  NovelModels.findOne({ bookId: bookId, CharacterId: CharacterId }).select('bookId bookName title content').exec((err, doc) => {
+  let no = req.body.no;
+  NovelModels.findOne({ bookId: bookId, no: no }).select('bookId bookName title content no').exec((err, doc) => {
     res.json({
       data: doc,
       status: 200,

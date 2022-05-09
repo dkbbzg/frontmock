@@ -137,7 +137,7 @@ router.post('/spiderCharacter', function (req, res, next) {
   superagent.get(url)
     .end(async function (err, sres) {
       if (err) {
-        return next(err);
+        console.log('spiderCharacter: error1 /n', err);
       }
       const $ = cheerio.load(sres.text);
       $('#list a').each(async function (idx, element) {
@@ -151,22 +151,22 @@ router.post('/spiderCharacter', function (req, res, next) {
           no: idx
         }
 
-        console.log(item.href)
+        
         await superagent.get(item.href).end(async function (err, eres) {
           if (err) {
-            return next(err);
+            console.log('spiderCharacter: error2 /n', err);
           }
           let content = '';
+          console.log(eres)
           const _$ = cheerio.load(eres.text);
           content += _$('#content').html();
           item.content = content;
 
           await updateNovels(item).then(doc => {
-            console.log(doc);
           }).catch(err => {
-            console.log('spiderCharacter: error /n', err);
+            console.log('spiderCharacter: error3 /n', err);
           })
-          
+
           if (idx == $('#list a').length - 1) {
             res.json({
               msg: `正在获取小说${bookName}-${author}的章节`,
