@@ -7,15 +7,15 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 
 // 连接本地数据库
-// const mongoose = require('mongoose');
-// mongoose.connect('mongodb://127.0.0.1:27017/frontmock');
-// const db = mongoose.connection;
-// db.on('error', function (error) {
-//   console.log('Database frontmock connect error: ' + error)
-// })
-// db.once('open', function () {
-//   console.log('Database frontmock connect success!')
-// })
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1:27017/frontmock');
+const db = mongoose.connection;
+db.on('error', function (error) {
+  console.log('Database frontmock connect error: ' + error)
+})
+db.once('open', function () {
+  console.log('Database frontmock connect success!')
+})
 
 // 创建项目实例
 var app = express();
@@ -46,52 +46,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 加载路由控制
-const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const uploadRouter = require('./routes/upload');
-const companyRouter = require('./routes/company');
-const homeRouter = require('./routes/home');
-const productRouter = require('./routes/product');
-const frontRouter = require('./routes/front');
-const monitorviewRouter = require('./routes/monitor/monitorview');  // 监控试图概览接口
-const domainNameBlacklistRouter = require('./routes/domainNameBlacklist/domainNameBlacklist');  // 域名黑名单接口
-const schedpolicyRouter = require('./routes/Schedpolicy/Schedpolicy');  // 区域配置
-const interfaceControllerRouter = require('./routes/InterfaceController/InterfaceController');  // 菜单配置
-const InterfaceRoleControllerRouter = require('./routes/InterfaceRoleController/InterfaceRoleController');  // 角色管理
-const analysisRouter = require('./routes/analysis/analysis');  // 用户质量分析
-const top20DomainRouter = require('./routes/Top20Domain/Top20Domain');  // TOP 20 域名
 
-// 湖南一键应急
-const HuNan_ChongBaoGongZuoTai = require('./routes/HuNan/ChongBaoGongZuoTai');  // 湖南一键应急 重保工作台
-// 重庆一键应急
-const CQ_YuMingFengDu = require('./routes/CQ/YuMingFengDu');  // 重庆一键应急 域名封堵
-// CRM
-const CRM_User = require('./routes/CRM/User');
-const CRM_Category = require('./routes/CRM/Category');
 
 // 匹配路径和路由
-app.use('/', indexRouter);
-app.use('/monitorview', monitorviewRouter);  // 监控试图概览接口
-app.use('/blackList', domainNameBlacklistRouter);  // 域名黑名单接口
-app.use('/strategy', schedpolicyRouter);  // 区域配置
-app.use('/interfaceController', interfaceControllerRouter);  // 菜单配置
-app.use('/interfaceRoleController', InterfaceRoleControllerRouter);  // 角色管理
-app.use('/analysis', analysisRouter);  // 角色管理
-app.use('/top20', top20DomainRouter);  // TOP 20 域名
 app.use('/users', usersRouter);
-app.use('/upload', uploadRouter);
-app.use('/company', companyRouter);
-app.use('/home', homeRouter);
-app.use('/product', productRouter);
-app.use('/front', frontRouter);
-// CRM
-app.use('/crm/user', CRM_User);
-app.use('/crm/category', CRM_Category);
-
-// 湖南一键应急 路由
-app.use('/chongBaoGongZuoTai', HuNan_ChongBaoGongZuoTai);  // 湖南一键应急 重保工作台
-// 重庆一键应急 路由
-app.use('/YuMingFengDu', CQ_YuMingFengDu);  // 重庆一键应急 域名封堵
 
 // 404错误处理
 app.use(function (req, res, next) {
