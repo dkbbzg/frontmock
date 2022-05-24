@@ -16,8 +16,9 @@ const upload = multer({
 });
 
 router.post('/', upload.single('file'), function (req, res, next) {
-    let url = 'http://' + req.headers.host + '/upload/' + req.file.originalname;
-    res.end(__dirname + req.file.path);
+    console.log(req.body.files, 1)
+    let url = 'http://' + req.headers.host + '/upload/' + req.body.files.originalname;
+    res.end(__dirname + req.body.files.path);
 })
 
 // 单域多文件上传：input[file]的 multiple=="multiple"

@@ -11,13 +11,13 @@ const SecretKey = 'CrMsEcReT';
 // 连接本地数据库
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
-mongoose.connect('mongodb://127.0.0.1:27017/CRM');
+mongoose.connect('mongodb://127.0.0.1:27017/managesys');
 const db = mongoose.connection;
 db.on('error', function (error) {
   console.log('Database frontmock connect error: ' + error)
 })
 db.once('open', function () {
-  console.log('Database CRM connect success!')
+  console.log('Database managesys connect success!')
 })
 
 // 创建项目实例
@@ -103,12 +103,12 @@ const CRM_Business = require('./routes/CRM/Business');
 // 匹配路径和路由
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/upload', uploadRouter);
 app.use('/company', companyRouter);
 app.use('/home', homeRouter);
 app.use('/product', productRouter);
 app.use('/front', frontRouter);
 // CRM
+app.use('/crm/upload', uploadRouter);
 app.use('/crm/user', CRM_User);
 app.use('/crm/category', CRM_Category);
 app.use('/crm/people', CRM_People);
