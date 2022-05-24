@@ -73,8 +73,9 @@ router.post('/register', function (req, res) {
   })
 })
 
-router.get('/searchCollection', function (req, res) {
-  CollectionModels.find().then((doc) => {
+router.post('/searchCollection', function (req, res) {
+  let user = req.body.user;
+  CollectionModels.find({ user: user }).then((doc) => {
     res.json({
       status: 1,
       data: doc
@@ -86,8 +87,9 @@ router.post('/collection', function (req, res) {
   let title = req.body.title;
   let href = req.body.href;
   let type = req.body.type;
+  let user = req.body.user;
   if (type == 'true') {
-    CollectionModels.deleteOne({ href: href }, function (err) {
+    CollectionModels.deleteOne({ href, user }, function (err) {
       if (err) {
         res.json({
           status: 0,
@@ -102,7 +104,7 @@ router.post('/collection', function (req, res) {
       }
     });
   } else {
-    CollectionModels.update({ href: href }, { title, href }, { multi: true, upsert: true }, function (err, docs) {
+    CollectionModels.update({ href, user }, { title, href, user }, { multi: true, upsert: true }, function (err, docs) {
       if (err) {
         res.json({
           status: 0,
@@ -121,7 +123,8 @@ router.post('/collection', function (req, res) {
 
 router.post('/is_collection', function (req, res) {
   let href = req.body.href;
-  CollectionModels.find({ href: href }).then(doc => {
+  let user = req.body.user;
+  CollectionModels.find({ href, user }).then(doc => {
     if (doc.length) {
       res.json({
         status: 1,
