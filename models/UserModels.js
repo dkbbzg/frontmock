@@ -2,12 +2,14 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-    "_id": String,
     "user_name": String,
     "user_pwd": String,
-    "user_jurisdiction": Number
+    "user_role": String,
+    "token": String
+}, {
+    versionKey: false
 });
 
-const UserModels = mongoose.model('users', UserSchema)
+const UserModels = mongoose.model('user', UserSchema)
 
 module.exports = UserModels

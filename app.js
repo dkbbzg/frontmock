@@ -53,7 +53,7 @@ app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
 
-const UserModels = require('./models/CRM/UserModels');
+const UserModels = require('./models/UserModels');
 let isRevokedCallback = function (req, payload, done) {
   let _id = payload._id;
 
@@ -83,36 +83,16 @@ app.use(expressJwt({
   },
   isRevoked: isRevokedCallback
 }).unless({
-  path: ['/crm/user/login'] // 指定路径不经过 Token 解析
+  path: ['/user/login'] // 指定路径不经过 Token 解析
 }))
 
 // 加载路由控制
-const indexRouter = require('./routes/index');
+const goodsRouter = require('./routes/goods');
 const usersRouter = require('./routes/users');
-const uploadRouter = require('./routes/upload');
-const companyRouter = require('./routes/company');
-const homeRouter = require('./routes/home');
-const productRouter = require('./routes/product');
-const frontRouter = require('./routes/front');
-// CRM
-const CRM_User = require('./routes/CRM/User');
-const CRM_Category = require('./routes/CRM/Category');
-const CRM_People = require('./routes/CRM/People');
-const CRM_Business = require('./routes/CRM/Business');
 
 // 匹配路径和路由
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/company', companyRouter);
-app.use('/home', homeRouter);
-app.use('/product', productRouter);
-app.use('/front', frontRouter);
-// CRM
-app.use('/crm/upload', uploadRouter);
-app.use('/crm/user', CRM_User);
-app.use('/crm/category', CRM_Category);
-app.use('/crm/people', CRM_People);
-app.use('/crm/business', CRM_Business);
+app.use('/goods', goodsRouter);
+app.use('/user', usersRouter);
 
 //  解析TOKEN失败
 app.use(function (err, req, res, next) {
