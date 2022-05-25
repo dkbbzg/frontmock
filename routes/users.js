@@ -43,7 +43,6 @@ router.post('/login', function (req, res) {
                     res.header({
                         Authorization: doc.token
                     })
-                    console.log(doc)
                     res.json({
                         success: true,
                         message: '登录成功',

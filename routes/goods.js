@@ -92,12 +92,15 @@ router.post('/addEditGoods', (req, res) => {
   let original = req.body.original;
   let current = req.body.current;
   let files = req.body.files;
+  let from = req.body.from;
+  let express = req.body.express;
+  let desc = req.body.desc;
   let type = req.body.type;
 
   if (req.user.role === 'admin') {
     if (type == 'add') {
       // 新增
-      let newCollection = new GoodsModel({ name, category, original, current, files });
+      let newCollection = new GoodsModel({ name, category, original, current, files, from, express, desc });
       newCollection.save((err, data) => {
         if (err) {
           res.json({
@@ -120,7 +123,7 @@ router.post('/addEditGoods', (req, res) => {
             message: '程序错误,没有找到对应的数据!'
           })
         } else {
-          GoodsModel.updateOne({ _id }, { name, category, original, current, files }, err => {
+          GoodsModel.updateOne({ _id }, { name, category, original, current, files, from, express, desc }, err => {
             if (err) {
               res.json({
                 success: false,

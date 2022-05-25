@@ -7,6 +7,9 @@ const GoodsSchema = new Schema({
     "files": [],    //  图片
     "original": Number,   //  原价
     "current": Number,   //  现价
+    "from": String,   //  发货地
+    "express": Number,   //  快递方式
+    "desc": String,   // 描述
 }, {
     versionKey: false
 });
