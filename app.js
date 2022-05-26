@@ -83,7 +83,10 @@ app.use(expressJwt({
   },
   isRevoked: isRevokedCallback
 }).unless({
-  path: ['/user/login'] // 指定路径不经过 Token 解析
+  path: [
+    '/user/login',
+    '/goods/front/getGoods'
+  ] // 指定路径不经过 Token 解析
 }))
 
 // 加载路由控制

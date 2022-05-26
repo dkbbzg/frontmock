@@ -2,6 +2,31 @@ const express = require('express');
 const router = express.Router();
 const GoodsModel = require('../models/GoodsModels');
 
+//  前台 获取数据
+router.post('/front/getGoods', (req, res) => {
+  GoodsModel
+    .find({})
+    .sort({
+      _id: -1
+    })
+    .exec((err, doc) => {
+      if (err) {
+        res.json({
+          success: false,
+          message: err,
+          data: []
+        })
+      } else {
+        res.json({
+          success: true,
+          message: '查询成功',
+          data: doc
+        })
+      }
+    })
+})
+
+
 //  获取数据
 router.post('/getGoods', (req, res) => {
   let name = req.body.name ? req.body.name : '';
