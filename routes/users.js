@@ -26,12 +26,12 @@ router.post('/login', function (req, res) {
             })
         } else {
             const new_token = 'Bearer ' + jwt.sign({
-                    _id: data._id,
-                    role: data.user_role
-                },
+                _id: data._id,
+                role: data.user_role
+            },
                 'CrMsEcReT', {
-                    expiresIn: 3600 * 24 * 3
-                }
+                expiresIn: 3600 * 24 * 3
+            }
             )
             UserModels.findById(data._id, (err, doc) => {
                 doc.token = new_token;
@@ -65,43 +65,56 @@ router.post('/register', function (req, res) {
     let user_pwd = req.body.pwd;
     let user_role = req.body.role;
 
-    if (req.user.role === 'admin') {
-        UserModels.findOne({
-            user_name: user_name
-        }).then(data => {
-            if (!data) {
-                let newUserData = new UserModels({
-                    user_name: user_name,
-                    user_pwd: bcrypt.hashSync(user_pwd, salt),
-                    user_role: user_role ? user_role : 'user'
-                })
-                newUserData.save((err, data) => {
-                    if (err) {
-                        res.json({
-                            success: false,
-                            message: err
-                        })
-                    } else {
-                        res.json({
-                            success: true,
-                            message: '注册成功'
-                        })
+    UserModels.findOne({
+        user_name: user_name
+    }).then(data => {
+        if (!data) {
+            let newUserData = new UserModels({
+                user_name: user_name,
+                user_pwd: bcrypt.hashSync(user_pwd, salt),
+                user_role: user_role ? user_role : 'user'
+            })
+            newUserData.save((err, data) => {
+                if (err) {
+                    res.json({
+                        success: false,
+                        message: err
+                    })
+                } else {
+                    const new_token = 'Bearer ' + jwt.sign({
+                        _id: data._id,
+                        role: data.user_role
+                    },
+                        'CrMsEcReT', {
+                        expiresIn: 3600 * 24 * 3
                     }
-                })
-            } else {
-                res.json({
-                    success: false,
-                    message: '此账号已存在'
-                })
-            }
-        })
-    } else {
-        res.json({
-            code: 401,
-            success: false,
-            message: '当前用户无权限！'
-        })
-    }
+                    )
+                    UserModels.findById(data._id, (err, doc) => {
+                        doc.token = new_token;
+                        doc.save((err, doc) => {
+                            let user_data = {
+                                user_name: doc.user_name,
+                                user_role: doc.user_role
+                            }
+                            res.header({
+                                Authorization: doc.token
+                            })
+                            res.json({
+                                success: true,
+                                message: '注册成功',
+                                user: user_data
+                            })
+                        });
+                    })
+                }
+            })
+        } else {
+            res.json({
+                success: false,
+                message: '此账号已存在'
+            })
+        }
+    })
 })
 // 修改密码
 router.post('/updatePWD', function (req, res) {

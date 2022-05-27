@@ -85,6 +85,7 @@ app.use(expressJwt({
 }).unless({
   path: [
     '/user/login',
+    '/user/register',
     '/goods/front/getGoods'
   ] // 指定路径不经过 Token 解析
 }))
