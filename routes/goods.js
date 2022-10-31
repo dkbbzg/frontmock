@@ -3,11 +3,12 @@ const router = express.Router();
 const GoodsModel = require('../models/GoodsModels');
 const NewGoodsModels = require('../models/NewGoodsModels');
 
-//  前台 获取数据
+// 口袋商城页面 口袋商品获取数据
 router.post('/front/getGoods', (req, res) => {
+  // 获取类别和学校的参数
   let category = req.body.category !== '' ? req.body.category : '';
   let region = req.body.region ? req.body.region : '';
-
+  // 查询条件  类别和学校
   let queryParams = {};
   if (region !== '') {
     queryParams.region = {
@@ -19,7 +20,7 @@ router.post('/front/getGoods', (req, res) => {
       $elemMatch: { $eq: category }
     }
   }
-
+  // 根据以上查询条件查找数据并倒序返回
   NewGoodsModels
     .find(queryParams)
     .sort({
@@ -41,8 +42,42 @@ router.post('/front/getGoods', (req, res) => {
       }
     })
 })
-// 新增编辑
+// 口袋商城页面 右上角搜索
+router.post('/front/getGoodsByName', (req, res) => {
+  // 获取参数
+  let name = req.body.name ? req.body.name : '';
+  // 查询条件
+  let queryParams = {};
+  if (name !== '') {
+    queryParams.name = {
+      $regex: name
+    }
+  }
+  // 根据以上查询条件查找数据并倒序返回
+  NewGoodsModels
+    .find(queryParams)
+    .sort({
+      _id: -1
+    })
+    .exec((err, doc) => {
+      if (err) {
+        res.json({
+          success: false,
+          message: err,
+          data: []
+        })
+      } else {
+        res.json({
+          success: true,
+          message: '查询成功',
+          data: doc
+        })
+      }
+    })
+})
+// 口袋商城页面 新增编辑
 router.post('/front/addGoods', (req, res) => {
+  // 获取参数
   let name = req.body.name;
   let region = req.body.region;
   let category = req.body.category;
@@ -51,32 +86,26 @@ router.post('/front/addGoods', (req, res) => {
   let current = req.body.current;
   let delivery = req.body.delivery;
   let desc = req.body.desc;
-
-  if (req.user.role === 'admin') {
-    let newCollection = new NewGoodsModels({ userId: req.user._id, name, category, original, current, files, delivery, region, desc });
-    newCollection.save((err, data) => {
-      if (err) {
-        res.json({
-          success: false,
-          message: err
-        })
-      } else {
-        res.json({
-          success: true,
-          message: '新增成功'
-        })
-      }
-    })
-  } else {
-    res.json({
-      code: 401,
-      success: false,
-      message: '当前用户无权限！'
-    })
-  }
+  // 创建实例
+  let newCollection = new NewGoodsModels({ userId: req.user._id, name, category, original, current, files, delivery, region, desc });
+  // 将实例存入数据表中
+  newCollection.save((err, data) => {
+    if (err) {
+      res.json({
+        success: false,
+        message: err
+      })
+    } else {
+      res.json({
+        success: true,
+        message: '新增成功'
+      })
+    }
+  })
 })
-//  前台 我的商品 查询
+// 口袋商城页面 我的商品 查询
 router.post('/front/getMyGoods', (req, res) => {
+  // 根据请求头中的用户信息查找当前用户的商品并倒序返回
   NewGoodsModels
     .find({ userId: req.user._id })
     .sort({
@@ -98,8 +127,9 @@ router.post('/front/getMyGoods', (req, res) => {
       }
     })
 })
-//  前台 我的商品 删除
+// 口袋商城页面 我的商品 删除
 router.post('/front/deleteMyGood', (req, res) => {
+  // 根据商品的id删除数据表中对应的数据
   NewGoodsModels.remove({ _id: req.body.id }, err => {
     if (err) {
       res.json({
@@ -116,24 +146,33 @@ router.post('/front/deleteMyGood', (req, res) => {
 })
 
 
-//  获取数据
+//  管理页面 获取数据
 router.post('/getGoods', (req, res) => {
+  // 获取参数
   let name = req.body.name ? req.body.name : '';
-  let category = req.body.category !== '' ? parseInt(req.body.category) : '';
+  let category = req.body.category !== '' ? req.body.category : '';
+  let region = req.body.region ? req.body.region : '';
   let page = parseInt(req.body.page) - 1 ? parseInt(req.body.page) - 1 : 0;
   let pageSize = parseInt(req.body.pageSize) ? parseInt(req.body.pageSize) : 0;
-
+  // 查询条件
   let queryParams = {};
   if (name !== '') {
     queryParams.name = {
       $regex: name
     }
   }
-  if (category !== '') {
-    queryParams.category = category
+  if (region !== '') {
+    queryParams.region = {
+      $regex: region
+    }
   }
-
-  GoodsModel.count(queryParams).exec((err, count) => {
+  if (category !== '') {
+    queryParams.category = {
+      $elemMatch: { $eq: category }
+    }
+  }
+  // 统计符合条件的数据数量
+  NewGoodsModels.count(queryParams).exec((err, count) => {
     if (err) {
       res.json({
         success: false,
@@ -144,7 +183,8 @@ router.post('/getGoods', (req, res) => {
         }
       })
     } else {
-      GoodsModel
+      // 根据查询条件查找数据并根据当前页数当前页面数据数量来返回相应段落的数据
+      NewGoodsModels
         .find(queryParams)
         .skip(page * pageSize)
         .limit(pageSize)
@@ -177,13 +217,16 @@ router.post('/getGoods', (req, res) => {
 })
 //  删除
 router.post('/deleteGoods', (req, res) => {
+  // 获取参数
   let ids = req.body.ids.split(',');
+  // 查询条件
   let deleteParams = {
     _id: {
       $in: ids
     }
   }
-  GoodsModel.remove(deleteParams, err => {
+  // 根据查询条件删除数据
+  NewGoodsModels.remove(deleteParams, err => {
     if (err) {
       res.json({
         message: '删除失败!',
@@ -198,69 +241,5 @@ router.post('/deleteGoods', (req, res) => {
   })
 
 })
-// 新增编辑
-router.post('/addEditGoods', (req, res) => {
-  let _id = req.body.id;
-  let name = req.body.name;
-  let category = req.body.category;
-  let original = req.body.original;
-  let current = req.body.current;
-  let files = req.body.files;
-  let from = req.body.from;
-  let express = req.body.express;
-  let desc = req.body.desc;
-  let type = req.body.type;
-
-  if (req.user.role === 'admin') {
-    if (type == 'add') {
-      // 新增
-      let newCollection = new GoodsModel({ name, category, original, current, files, from, express, desc });
-      newCollection.save((err, data) => {
-        if (err) {
-          res.json({
-            success: false,
-            message: err
-          })
-        } else {
-          res.json({
-            success: true,
-            message: '新增成功'
-          })
-        }
-      })
-    } else {
-      // 更新
-      GoodsModel.findById(_id).then(data => {
-        if (!data) {
-          res.json({
-            success: false,
-            message: '程序错误,没有找到对应的数据!'
-          })
-        } else {
-          GoodsModel.updateOne({ _id }, { name, category, original, current, files, from, express, desc }, err => {
-            if (err) {
-              res.json({
-                success: false,
-                message: err
-              })
-            }
-            res.json({
-              success: true,
-              message: `修改成功!`
-            })
-          })
-
-        }
-      })
-    }
-  } else {
-    res.json({
-      code: 401,
-      success: false,
-      message: '当前用户无权限！'
-    })
-  }
-})
-
 
 module.exports = router;

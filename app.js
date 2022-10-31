@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.connect('mongodb://127.0.0.1:27017/managesys');
 const db = mongoose.connection;
+// 本地数据库连接成功或失败的监听
 db.on('error', function (error) {
   console.log('Database frontmock connect error: ' + error)
 })
@@ -26,7 +27,6 @@ var app = express();
 //设置允许跨域访问该服务.
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-  //Access-Control-Allow-Headers ,可根据浏览器的F12查看,把对应的粘贴在这里就行
   res.header('Access-Control-Allow-Headers', 'Content-Type,Content-Length, Authorization, Accept,X-Requested-With, tokenUuid, usertoken, token');
   res.header('Access-Control-Allow-Methods', '*');
   res.header('Access-Control-Expose-Headers', 'Authorization')
@@ -52,11 +52,11 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 // 定义静态文件目录
 app.use(express.static(path.join(__dirname, 'public')));
-
+// 引入用户表的model
 const UserModels = require('./models/UserModels');
+// 用来判断Token是否过期
 let isRevokedCallback = function (req, payload, done) {
   let _id = payload._id;
-
   UserModels.findOne({
     _id: _id
   }, 'token').then(data => {
@@ -67,7 +67,6 @@ let isRevokedCallback = function (req, payload, done) {
     }
   });
 }
-
 // Token管理
 app.use(expressJwt({
   secret: SecretKey, // 签名的密钥 或 PublicKey
@@ -86,7 +85,8 @@ app.use(expressJwt({
   path: [
     '/user/login',
     '/user/register',
-    '/goods/front/getGoods'
+    '/goods/front/getGoods',
+    '/goods/front/getGoodsByName'
   ] // 指定路径不经过 Token 解析
 }))
 
