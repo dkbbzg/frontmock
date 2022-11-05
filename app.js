@@ -11,13 +11,13 @@ const SecretKey = 'CrMsEcReT';
 // 连接本地数据库
 const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
-mongoose.connect('mongodb://127.0.0.1:27017/CRM');
+mongoose.connect('mongodb://127.0.0.1:27017/home_cow');
 const db = mongoose.connection;
 db.on('error', function (error) {
-  console.log('Database frontmock connect error: ' + error)
+  console.log('Database home_cow connect error: ' + error)
 })
 db.once('open', function () {
-  console.log('Database CRM connect success!')
+  console.log('Database home_cow connect success!')
 })
 
 // 创建项目实例
@@ -83,7 +83,7 @@ app.use(expressJwt({
   },
   isRevoked: isRevokedCallback
 }).unless({
-  path: ['/crm/user/login'] // 指定路径不经过 Token 解析
+  path: ['/user/login'] // 指定路径不经过 Token 解析
 }))
 
 // 加载路由控制
@@ -99,6 +99,8 @@ const CRM_User = require('./routes/CRM/User');
 const CRM_Category = require('./routes/CRM/Category');
 const CRM_People = require('./routes/CRM/People');
 const CRM_Business = require('./routes/CRM/Business');
+// home_cow
+const milkCardManagement = require('./routes/home_cow/milkCardManagement');
 
 // 匹配路径和路由
 app.use('/', indexRouter);
@@ -109,10 +111,12 @@ app.use('/home', homeRouter);
 app.use('/product', productRouter);
 app.use('/front', frontRouter);
 // CRM
-app.use('/crm/user', CRM_User);
-app.use('/crm/category', CRM_Category);
-app.use('/crm/people', CRM_People);
-app.use('/crm/business', CRM_Business);
+app.use('/user', CRM_User);
+app.use('/category', CRM_Category);
+app.use('/people', CRM_People);
+app.use('/business', CRM_Business);
+// home_cow
+app.use('/milkCardManagement', milkCardManagement);
 
 //  解析TOKEN失败
 app.use(function (err, req, res, next) {
